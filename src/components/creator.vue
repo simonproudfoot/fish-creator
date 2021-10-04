@@ -2,6 +2,7 @@
 <div class="" style="position: relative">
 
     <pre>{{movement}}</pre>
+    <h1>{{score}}</h1>
     <div id="container">
         <dat-gui v-if="gui" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-folder label="Fish position" v-if="fishObject">
@@ -166,18 +167,14 @@ export default {
         };
     },
     computed: {
-        speed() {
-            // watch movment and calculate
-            let speed = 1
-
-            if (this.fins.tail.selected != 'tail' || this.movement.smimWind == null || this.movement.roll == null || this.movement.updown == null) {
-                speed = 0
-            } else if (this.fins.body.selected != 'body') {
-                speed + 0.5
-            }
-
-            return speed
-        },
+        score() {
+            var correct = 0
+            Object.entries(this.fins).forEach((x) => {
+                console.log(x[0] == x[1].selected)
+                x[0] == x[1].selected ? correct++ : null
+            })
+            return correct
+        }
         // movement() {
         //     let smimWind = 8
         //     let roll = 8
@@ -270,28 +267,16 @@ export default {
         fishScale(x) {
             this.fishObject.scale.set(x, x, x);
         },
-        // 'movement.roll'(val) {
-        //     if (val < 0) {
-        //         this.movement.val = 0
-        //     }
-        //     if (val > 8) {
-        //         this.movement.val = 8
-        //     }
-        // },
 
         // ROLL FINS 
         'fins.dorsal.selected'(val) {
-
             if (val == 'dorsal') {
                 this.movement.roll = this.movement.roll - 3.5
             } else {
                 this.movement.roll = this.movement.roll + 5
-
             }
-
         },
         'fins.anal.selected'(val) {
-
             if (val == 'anal') {
                 this.movement.roll = this.movement.roll - 3.5
             } else {
@@ -299,14 +284,21 @@ export default {
             }
 
         },
-
         'fins.pectoral.selected'(val) {
-
             if (val == 'pectoral') {
-                alert('go')
+
                 this.movement.roll = this.movement.roll - 1
             } else {
                 this.movement.roll = this.movement.roll + 1
+            }
+
+        },
+
+        'fins.tail.selected'(val) {
+            if (val == 'tail') {
+                this.movement.smimWind = this.movement.smimWind - 5
+            } else {
+                this.movement.smimWind = this.movement.smimWind + 5
             }
 
         }
@@ -482,75 +474,48 @@ export default {
             }
             if (this.playing) {
 
-                if (this.fishObject.position.y > -10) {
-                    // if (this.movement.smimWind !== null) {
-                    //     this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9 - 1.5
-                    // } else {
-                    //     this.fishObject.rotation.y += 0.01
-                    //     move = 0
-                    // }
+                if (this.fishObject.position.y > -20) {
+                    console.log(this.score)
+
+                    if (this.score <= 3 && this.score >= 2) {
+                        this.fishObject.position.y -= 0.025
+                    } else if (this.score <= 2) {
+                        this.fishObject.position.y -= 0.09
+                    }
+
+                    // WINDING
+                    if (this.movement.smimWind <= 7) {
+                        this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9 - 1.5
+
+                    }
+
+                    // ROLL
                     if (this.movement.roll <= 7) {
                         this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(speed * 1.5, true)) * Math.PI * this.movement.roll / 10; // roll
                         // this.fishObject.rotation.x = Math.sin(this.clock.getElapsedTime()) * 3 + 3
-                    } else {
-                        this.fishObject.rotation.x += 0.01
                     }
-                    // if (this.movement.updown !== null) {
-                    //     const updown = this.movement.updown
-                    //     this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * updown / 3 + updown / 3
-                    // } else {
-                    //     this.fishObject.position.y -= 0.9
-                    //     move = 0
-                    // }
 
-                } else {
-                    if (this.fishObject.rotation.z > -1.5) {
-                        this.fishObject.rotation.z -= 0.02
-                        // this.fishObject.position.y -= 0.09
+                    // // up down
+                    if ( this.score > 3) {
+                        this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * 2 + 2
                     }
                 }
-                // if (this.fishObject.position.y > -14) {
-                //     //this.fishObject.getObjectByName('pos-pectoral_fin-tail').rotation.z = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(4); // move indivdiual fins (not clones)
-                //     // first val is speed, second is range of motion
-
-                //     if (this.movement.smimWind !== null) {
-                //         // this.fishObject.rotation.y = this.fishObject.rotation.y = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(this.movement.smimWind); // swimWind
-                //         this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9
-                //     } else {
-                //         this.fishObject.rotation.y += 0.01
-                //         //  this.fishObject.position.x = Math.sin(this.clock.getElapsedTime()) * -this.movement.updown*4.5 + this.movement.updown*4.5;
-                //     }
-
-                //     if (this.movement.roll !== null) {
-                //         this.fishObject.rotation.z = this.fishObject.rotation.z = Math.sin(Date.now() * this.convertDecimal(this.speed * 2, true)) * Math.PI * this.convertDecimal(this.movement.roll); // roll
-                //     } else {
-                //         this.fishObject.rotation.z += 0.01
-                //     }
-
-                //     if (this.movement.updown !== null) {
-                //         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown + this.movement.updown;
-
-                //         this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(this.speed, true)) * Math.PI * this.convertDecimal(this.movement.updown); // roll
-                //     } else {
-                //         this.fishObject.position.y -= 0.09
-                //     }
-
-                // } else {
-                //     // console.log(this.fishObject.rotation.z)
-                //     if (this.fishObject.rotation.z > 1.5) {
+            } else {
+                this.playing = false
+                this.defaultPosition()
+                //     if (this.fishObject.rotation.z > -1.5) {
                 //         this.fishObject.rotation.z -= 0.02
-                //         this.fishObject.position.y -= 0.09
+
+                //         // this.fishObject.position.y -= 0.09
                 //     }
+                //     console.log(this.fishObject.rotation.y)
+                //     if (this.fishObject.rotation.y < -0.97) {
+
+                //         this.fishObject.rotation.y += 0.1
+                //    }
+
                 // }
 
-                // move came to center
-                // if (this.camera.position.y < 6.68) {
-                //     this.camera.position.y += 0.25
-                //     this.camera.zoom = 60
-                // }
-
-                // this.fishObject.position.y = this.fishObject.position.y = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(8); // up and down
-                // this.fishObject.rotation.y += 0.01
             }
             this.renderer.render(this.scene, this.camera);
         },
