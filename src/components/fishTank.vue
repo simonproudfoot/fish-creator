@@ -199,6 +199,7 @@ export default {
             this.background.scale.y = 2.16
             this.background.scale.x = 2
             this.scene.add(this.background);
+
             // Load object
             const gltfLoader = new GLTFLoader();
             this.$store.state.fishes.slice().reverse().forEach(fish => {
@@ -241,7 +242,7 @@ export default {
                 });
             })
             // RENDER
-            this.renderer = new Three.WebGLRenderer({ antialias: true, sortObjects: false });
+            this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(this.renderer.domElement);
             setTimeout(() => {

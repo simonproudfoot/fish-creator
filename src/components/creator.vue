@@ -1,10 +1,12 @@
 <template>
 <div class="" style="position: relative">
+
+    <pre>{{movement}}</pre>
     <div id="container">
         <dat-gui v-if="gui" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-folder label="Fish position" v-if="fishObject">
                 <dat-string v-model="fishColor"></dat-string>
-            
+
                 <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
                 <dat-number v-model="allFish[0].scale.y" :min="-100" :max="100" :step="0.01" label="Y" /> -->
                 <dat-number v-model="fishObject.position.x" :min="-70" :max="53" :step="1" label="X" />
@@ -154,7 +156,13 @@ export default {
                     roll: 0,
                     updown: 4,
                 },
+
             },
+            movement: {
+                smimWind: 8,
+                roll: 8,
+                updown: 8,
+            }
         };
     },
     computed: {
@@ -169,64 +177,173 @@ export default {
             }
 
             return speed
-
         },
-        movement() {
-            let smimWind = 8
-            let roll = 4
-            let updown = 4
+        // movement() {
+        //     let smimWind = 8
+        //     let roll = 8
+        //     let updown = 8
+        //     let correct = 0
+        //     Object.entries(this.fins).forEach((x) => {
+        //         console.log(x[0] == x[1].selected)
+        //         x[0] == x[1].selected ? correct++ : null
+        //     })
+        //     // if all fins perfect!
+        //     // if (correct == 6) {
+        //     //     smimWind = 0.5
+        //     //     roll = 0.9
+        //     //     updown = 0.5
+        //     // }
+        //     // // if less than 2 fins in correct place, sink
+        //     // if (correct <= 2) {
+        //     //     smimWind = null
+        //     //     roll = null
+        //     //     updown = null
+        //     // }
 
-            let correct = 0
-            Object.entries(this.fins).forEach((x) => {
-                x[0] == x[1].selected ? correct++ : null
-            })
-            // if all fins perfect!
-            if (correct == 6) {
-                smimWind = 0.5
-                roll = 0.9
-                updown = 0.5
-            }
-            // if less than 2 fins in correct place, sink
-            if (correct <= 2) {
-                console.log('SINK!')
-                smimWind = null
-                roll = null
-                updown = null
-            }
-            // if dorsal or anal not correct roll over 
-            if (this.fins.dorsal.selected != 'dorsal' && this.fins.anal.selected != 'anal' && this.fins.pelvic.selected != 'pelvic') {
-                console.log('rolling. missing anal / dorsal / pelvic')
-                roll = null
-            }
+        //     // if dorsal or anal not correct roll over 
+        //     // if (this.fins.dorsal.selected != 'dorsal' && this.fins.anal.selected != 'anal' && this.fins.pelvic.selected != 'pelvic') {
+        //     //     console.log('rolling. missing anal / dorsal / pelvic')
+        //     //     roll = 8
+        //     // }else{
+        //     //     console.log('sdz')
+        //     // }
 
-            // if no tail sink
-            if (this.fins.tail != 'tail') {
-                smimWind = null
-                roll + 7
-            } else if (this.fins.pectoral.length && this.fins.pectoral != 'pectoral') {
-                smimWind = 8
-            }
-            console.log(correct)
+        //     if (this.fins.dorsal.selected == 'dorsal') {
+        //         alert('-')
+        //         roll - 2.5
+        //     } else {
+        //         alert('+')
+        //         roll + 2.5
+        //     }
 
-            // else Work out forces
-            return {
-                smimWind: smimWind,
-                roll: roll,
-                updown: updown,
-            }
-        }
+        //     // if (this.fins.anal.selected == 'anal') {
+        //     //     roll - 2.5
+        //     // } else {
+        //     //     roll + 2.5
+        //     // }
+
+        //     // if (this.fins.pelvic.selected == 'pelvic') {
+        //     //     roll - 2.5
+        //     // } else {
+        //     //     roll + 2.5
+        //     // }
+
+        //     // if no tail sink
+        //     // if (this.fins.tail == 'tail') {
+        //     //     if (smimWind != null) {
+        //     //         smimWind - 7
+        //     //     } else {
+        //     //         smimWind = 7
+        //     //     }
+        //     //     //roll - 1
+        //     // } else if (this.fins.pectoral.length && this.fins.pectoral != 'pectoral') {
+        //     //     smimWind = 8
+        //     // }
+
+        //     console.log(roll)
+
+        //     // else Work out forces
+        //     return {
+        //         smimWind: smimWind,
+        //         roll: roll,
+        //         updown: updown,
+        //     }
+
+        // }
     },
     watch: {
         playing(x) {
-            x ? this.changeSpeed(1) : this.changeSpeed(0), this.defaultPosition();
-            // setTimeout(() => {
-            //     this.playing = false
-            //     this.camera.position.y = 0
-            // }, 9000);
+            if (x) {
+                this.changeSpeed(1)
+            } else {
+                //  alert
+                this.defaultPosition()
+                this.changeSpeed(0),
+                    setTimeout(() => {
+                        this.movement.roll = 8
+                        this.movement.updown = 8
+                        this.movement.smimWind = 8
+                    }, 500);
+
+            }
         },
         fishScale(x) {
             this.fishObject.scale.set(x, x, x);
         },
+        // 'movement.roll'(val) {
+        //     if (val < 0) {
+        //         this.movement.val = 0
+        //     }
+        //     if (val > 8) {
+        //         this.movement.val = 8
+        //     }
+        // },
+
+        // ROLL FINS 
+        'fins.dorsal.selected'(val) {
+
+            if (val == 'dorsal') {
+                this.movement.roll = this.movement.roll - 3.5
+            } else {
+                this.movement.roll = this.movement.roll + 5
+
+            }
+
+        },
+        'fins.anal.selected'(val) {
+
+            if (val == 'anal') {
+                this.movement.roll = this.movement.roll - 3.5
+            } else {
+                this.movement.roll = this.movement.roll + 5
+            }
+
+        },
+
+        'fins.pectoral.selected'(val) {
+
+            if (val == 'pectoral') {
+                alert('go')
+                this.movement.roll = this.movement.roll - 1
+            } else {
+                this.movement.roll = this.movement.roll + 1
+            }
+
+        }
+
+        // fins: {
+        //     deep: true,
+        //     handler(val) {
+
+        //         // roll
+        //         var roll = 8
+        //         if (val.dorsal.selected == 'dorsal') {
+        //             roll = -3
+        //         } else {
+        //             roll = +3
+        //         }
+        //         if (val.anal.selected == 'anal') {
+        //             roll = -3
+        //         } else {
+        //             roll = +3
+        //         }
+        //         if (val.pectoral.selected == 'pectoral') {
+        //             roll = roll - 2
+        //             console.log('roll:' + roll)
+        //         } else {
+        //             roll = +2
+        //         }
+        //         if (roll < 0) {
+        //             this.movement.roll = 0
+        //         } else if (roll > 8) {
+        //             this.movement.roll = 8
+        //         } else {
+        //             this.movement.roll = roll
+        //         }
+
+        //     }
+
+        //}
     },
 
     methods: {
@@ -323,7 +440,6 @@ export default {
             this.fishObject.position.y = this.startPosition.y;
             this.fishObject.position.x = this.startPosition.x;
             this.fishObject.position.z = this.startPosition.z;
-
         },
 
         showFin(position) {
@@ -333,7 +449,7 @@ export default {
                 let active = position + "_fin-" + this.draggingFin;
                 //this.fins[position].selected = this.draggingFin
 
-                if (this.fishObject.getObjectByName(name) && name !== active) {
+                if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
                 } else {
                     this.fishObject.getObjectByName(active).visible = true;
@@ -342,7 +458,6 @@ export default {
         },
         resetFins() {
             Object.values(this.fins).forEach(x => x.selected = '')
-
         },
         hideAllFins() {
             this.resetFins()
@@ -358,45 +473,75 @@ export default {
             });
         },
         animate() {
+            let speed = 1
+            let move = true
             requestAnimationFrame(this.animate);
             var delta = this.clock.getDelta();
             if (this.mixer && this.fishObject) {
                 this.mixer.update(delta);
             }
             if (this.playing) {
-                if (this.fishObject.position.y > -14) {
-                    //this.fishObject.getObjectByName('pos-pectoral_fin-tail').rotation.z = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(4); // move indivdiual fins (not clones)
-                    // first val is speed, second is range of motion
 
-                    if (this.movement.smimWind !== null) {
-                        // this.fishObject.rotation.y = this.fishObject.rotation.y = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(this.movement.smimWind); // swimWind
-                        this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9
+                if (this.fishObject.position.y > -10) {
+                    // if (this.movement.smimWind !== null) {
+                    //     this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9 - 1.5
+                    // } else {
+                    //     this.fishObject.rotation.y += 0.01
+                    //     move = 0
+                    // }
+                    if (this.movement.roll <= 7) {
+                        this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(speed * 1.5, true)) * Math.PI * this.movement.roll / 10; // roll
+                        // this.fishObject.rotation.x = Math.sin(this.clock.getElapsedTime()) * 3 + 3
                     } else {
-                        this.fishObject.rotation.y += 0.01
-                        //  this.fishObject.position.x = Math.sin(this.clock.getElapsedTime()) * -this.movement.updown*4.5 + this.movement.updown*4.5;
+                        this.fishObject.rotation.x += 0.01
                     }
-
-                    if (this.movement.roll !== null) {
-                        this.fishObject.rotation.z = this.fishObject.rotation.z = Math.sin(Date.now() * this.convertDecimal(this.speed * 2, true)) * Math.PI * this.convertDecimal(this.movement.roll); // roll
-                    } else {
-                        this.fishObject.rotation.z += 0.01
-                    }
-
-                    if (this.movement.updown !== null) {
-                        this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown + this.movement.updown;
-
-                        this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(this.speed, true)) * Math.PI * this.convertDecimal(this.movement.updown); // roll
-                    } else {
-                        this.fishObject.position.y -= 0.09
-                    }
+                    // if (this.movement.updown !== null) {
+                    //     const updown = this.movement.updown
+                    //     this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * updown / 3 + updown / 3
+                    // } else {
+                    //     this.fishObject.position.y -= 0.9
+                    //     move = 0
+                    // }
 
                 } else {
-                    // console.log(this.fishObject.rotation.z)
-                    if (this.fishObject.rotation.z > 1.5) {
+                    if (this.fishObject.rotation.z > -1.5) {
                         this.fishObject.rotation.z -= 0.02
-                        this.fishObject.position.y -= 0.09
+                        // this.fishObject.position.y -= 0.09
                     }
                 }
+                // if (this.fishObject.position.y > -14) {
+                //     //this.fishObject.getObjectByName('pos-pectoral_fin-tail').rotation.z = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(4); // move indivdiual fins (not clones)
+                //     // first val is speed, second is range of motion
+
+                //     if (this.movement.smimWind !== null) {
+                //         // this.fishObject.rotation.y = this.fishObject.rotation.y = Math.sin(Date.now() * this.convertDecimal(1, true)) * Math.PI * this.convertDecimal(this.movement.smimWind); // swimWind
+                //         this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9
+                //     } else {
+                //         this.fishObject.rotation.y += 0.01
+                //         //  this.fishObject.position.x = Math.sin(this.clock.getElapsedTime()) * -this.movement.updown*4.5 + this.movement.updown*4.5;
+                //     }
+
+                //     if (this.movement.roll !== null) {
+                //         this.fishObject.rotation.z = this.fishObject.rotation.z = Math.sin(Date.now() * this.convertDecimal(this.speed * 2, true)) * Math.PI * this.convertDecimal(this.movement.roll); // roll
+                //     } else {
+                //         this.fishObject.rotation.z += 0.01
+                //     }
+
+                //     if (this.movement.updown !== null) {
+                //         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown + this.movement.updown;
+
+                //         this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(this.speed, true)) * Math.PI * this.convertDecimal(this.movement.updown); // roll
+                //     } else {
+                //         this.fishObject.position.y -= 0.09
+                //     }
+
+                // } else {
+                //     // console.log(this.fishObject.rotation.z)
+                //     if (this.fishObject.rotation.z > 1.5) {
+                //         this.fishObject.rotation.z -= 0.02
+                //         this.fishObject.position.y -= 0.09
+                //     }
+                // }
 
                 // move came to center
                 // if (this.camera.position.y < 6.68) {
@@ -663,7 +808,7 @@ export default {
 .fin-anal,
 .fin-body {
     opacity: 0.5;
-    pointer-events: none;
+
 }
 
 h3 {
