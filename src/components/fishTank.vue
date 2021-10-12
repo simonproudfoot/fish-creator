@@ -1,6 +1,7 @@
 <template>
 <div class="" style="position: relative">
     <div id="container">
+
         <dat-gui v-if="gui && allFish[0]" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-number v-if="allFish[0].movement.roll" v-model="allFish[0].movement.roll" label="Roll" />
             <dat-number v-if="allFish[0].movement.smimWind" v-model="allFish[0].movement.smimWind" label="smimWind" />
@@ -39,8 +40,7 @@ export default {
     data() {
         return {
             allFish: [],
-            gui: true,
-
+            gui: false,
             fishScale: 1,
             playing: false,
             startRotation: {
@@ -97,6 +97,16 @@ export default {
                 },
             },
         };
+    },
+    computed: {
+        score() {
+            var correct = 0
+            Object.entries(this.fins).forEach((x) => {
+                console.log(x[0] == x[1].selected)
+                x[0] == x[1].selected ? correct++ : null
+            })
+            return correct
+        }
     },
     watch: {
         fishScale(x) {
@@ -202,7 +212,7 @@ export default {
 
             // Load object
             const gltfLoader = new GLTFLoader();
-            this.$store.state.fishes.slice().reverse().forEach(fish => {
+            this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
                 gltfLoader.load(this.fishObjectUlr, (gltf) => {
                     this.mixer = new Three.AnimationMixer(gltf.scene);
                     gltf.animations.forEach((clip) => {
@@ -212,29 +222,31 @@ export default {
                     gltf.castShadow = true;
                     //  this.hideAllFins();
                     this.allFish.push(gltf.scene);
-                    var i = this.allFish.length - 1
+        
 
                     Object.assign(this.allFish[i], { movement: fish.movement });
-
+                    Object.assign(this.allFish[i], { score: fish.score });
                     this.scene.add(this.allFish[i]);
-                    this.allFish[i].position.z = 10
+                 //   this.allFish[i].position.z = 10
                     this.allFish[i].getObjectByName("Body_SDS_1_2").material.color.setHex(fish.color);
                     this.allFish[i].rotation.y = -1.5
-                    if (i > 0) {
-                        this.allFish[i].castShadow = true
-
-                        //this.allFish[i].getObjectByName('body').material.color.set(fish.color);
+                    if (i != 0) {
+                       // this.allFish[i].castShadow = true
 
                         this.allFish[i].position.x = Math.random() * (100 - -100) + -100;
                         this.allFish[i].position.y = Math.random() * (10 - -10) + -10;
                         this.allFish[i].position.z = Math.random() * (340 - 240) + 240;
-                        if (i % 2 == 0) {
-                            this.allFish[i].rotation.y = 1.5
-                        }
+
+                        
+                        // if (i % 2 == 0) {
+                        //     this.allFish[i].rotation.y = 1.5
+                        // }
                     } else {
                         this.allFish[i].position.z = 350
                         this.allFish[i].position.x = -100
                     }
+                    this.allFish[i].getObjectByName("Markings_Left").visible = false
+                    this.allFish[i].getObjectByName("Markings_Right").visible = false
                     this.hideShowAllFins(i, fish)
 
                     this.playing = true

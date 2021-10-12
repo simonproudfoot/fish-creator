@@ -1,11 +1,12 @@
 <template>
 <div class="" style="position: relative">
 
-    <pre>{{movement}}</pre>
-    <h1>{{score}}</h1>
+    <!-- <pre>{{movement}}</pre>
+    <h1>{{score}}</h1> -->
     <div id="container">
         <dat-gui v-if="gui" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-folder label="Fish position" v-if="fishObject">
+
                 <dat-string v-model="fishColor"></dat-string>
 
                 <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
@@ -34,6 +35,7 @@
         </template>
         <transition name="fade">
             <footer v-if="!playing" class="footer">
+                {{rotationDirection}}
                 <div v-for="(fin, name, i) in fins" class="fin" :key="i" :class="'fin-'+name">
                     <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
@@ -49,6 +51,7 @@
                  </div> -->
             </footer>
             <footer class="footer--playing" v-else>
+                {{rotationDirection}}
                 <img :src="require('@/assets/button-tryagain.svg')" @click="playing = false, hideAllFins()" width="500" />
                 <img :src="require('@/assets/button-swim.svg')" @click="save" width="180" />
             </footer>
@@ -66,6 +69,11 @@ export default {
     data() {
         return {
             gui: true,
+            rotationDirection: {
+                x: '',
+                y: '',
+                z: '',
+            },
             // movement: {
             //     // max 8, null keeps going and 0 is still
             //     smimWind: 2,
@@ -175,80 +183,30 @@ export default {
             })
             return correct
         }
-        // movement() {
-        //     let smimWind = 8
-        //     let roll = 8
-        //     let updown = 8
-        //     let correct = 0
-        //     Object.entries(this.fins).forEach((x) => {
-        //         console.log(x[0] == x[1].selected)
-        //         x[0] == x[1].selected ? correct++ : null
-        //     })
-        //     // if all fins perfect!
-        //     // if (correct == 6) {
-        //     //     smimWind = 0.5
-        //     //     roll = 0.9
-        //     //     updown = 0.5
-        //     // }
-        //     // // if less than 2 fins in correct place, sink
-        //     // if (correct <= 2) {
-        //     //     smimWind = null
-        //     //     roll = null
-        //     //     updown = null
-        //     // }
 
-        //     // if dorsal or anal not correct roll over 
-        //     // if (this.fins.dorsal.selected != 'dorsal' && this.fins.anal.selected != 'anal' && this.fins.pelvic.selected != 'pelvic') {
-        //     //     console.log('rolling. missing anal / dorsal / pelvic')
-        //     //     roll = 8
-        //     // }else{
-        //     //     console.log('sdz')
-        //     // }
-
-        //     if (this.fins.dorsal.selected == 'dorsal') {
-        //         alert('-')
-        //         roll - 2.5
-        //     } else {
-        //         alert('+')
-        //         roll + 2.5
-        //     }
-
-        //     // if (this.fins.anal.selected == 'anal') {
-        //     //     roll - 2.5
-        //     // } else {
-        //     //     roll + 2.5
-        //     // }
-
-        //     // if (this.fins.pelvic.selected == 'pelvic') {
-        //     //     roll - 2.5
-        //     // } else {
-        //     //     roll + 2.5
-        //     // }
-
-        //     // if no tail sink
-        //     // if (this.fins.tail == 'tail') {
-        //     //     if (smimWind != null) {
-        //     //         smimWind - 7
-        //     //     } else {
-        //     //         smimWind = 7
-        //     //     }
-        //     //     //roll - 1
-        //     // } else if (this.fins.pectoral.length && this.fins.pectoral != 'pectoral') {
-        //     //     smimWind = 8
-        //     // }
-
-        //     console.log(roll)
-
-        //     // else Work out forces
-        //     return {
-        //         smimWind: smimWind,
-        //         roll: roll,
-        //         updown: updown,
-        //     }
-
-        // }
     },
     watch: {
+        'fishObject.rotation.x'(newVal, old) {
+            if (newVal > old) {
+                this.rotationDirection.x = '+'
+            } else {
+                this.rotationDirection.x = '-'
+            }
+        },
+        'fishObject.rotation.y'(newVal, old) {
+            if (newVal > old) {
+                this.rotationDirection.y = '+'
+            } else {
+                this.rotationDirection.y = '-'
+            }
+        },
+        'fishObject.rotation.z'(newVal, old) {
+            if (newVal > old) {
+                this.rotationDirection.z = '+'
+            } else {
+                this.rotationDirection.z = '-'
+            }
+        },
         playing(x) {
             if (x) {
                 this.changeSpeed(1)
@@ -286,56 +244,30 @@ export default {
         },
         'fins.pectoral.selected'(val) {
             if (val == 'pectoral') {
-
                 this.movement.roll = this.movement.roll - 1
             } else {
                 this.movement.roll = this.movement.roll + 1
             }
 
         },
-
         'fins.tail.selected'(val) {
             if (val == 'tail') {
                 this.movement.smimWind = this.movement.smimWind - 5
             } else {
                 this.movement.smimWind = this.movement.smimWind + 5
             }
+        },
 
-        }
+        // UP DOWN FINS
+        'fins.pelvic.selected'(val) {
+            if (val == 'pelvic') {
+                this.movement.updown = this.movement.updown - 5
+            } else {
+                this.movement.updown = this.movement.updown + 5
+            }
 
-        // fins: {
-        //     deep: true,
-        //     handler(val) {
+        },
 
-        //         // roll
-        //         var roll = 8
-        //         if (val.dorsal.selected == 'dorsal') {
-        //             roll = -3
-        //         } else {
-        //             roll = +3
-        //         }
-        //         if (val.anal.selected == 'anal') {
-        //             roll = -3
-        //         } else {
-        //             roll = +3
-        //         }
-        //         if (val.pectoral.selected == 'pectoral') {
-        //             roll = roll - 2
-        //             console.log('roll:' + roll)
-        //         } else {
-        //             roll = +2
-        //         }
-        //         if (roll < 0) {
-        //             this.movement.roll = 0
-        //         } else if (roll > 8) {
-        //             this.movement.roll = 8
-        //         } else {
-        //             this.movement.roll = roll
-        //         }
-
-        //     }
-
-        //}
     },
 
     methods: {
@@ -354,6 +286,7 @@ export default {
 
             Object.assign(final, { color: this.fishColor })
             Object.assign(final, { movement: this.movement })
+            Object.assign(final, { score: this.score })
 
             console.log(final)
             await this.$store.commit('ADD_FISH', final)
@@ -474,47 +407,55 @@ export default {
             }
             if (this.playing) {
 
-                if (this.fishObject.position.y > -20) {
-                    console.log(this.score)
+                if (this.fishObject.position.y > -18.5) {
 
                     if (this.score <= 3 && this.score >= 2) {
                         this.fishObject.position.y -= 0.025
                     } else if (this.score <= 2) {
-                        this.fishObject.position.y -= 0.09
+                        this.fishObject.position.y -= 0.07
+                    } else {
+                        this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown * 2
                     }
 
                     // WINDING
                     if (this.movement.smimWind <= 7) {
                         this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9 - 1.5
-
+                    } else {
+                        this.fishObject.rotation.y += 0.009
                     }
 
                     // ROLL
                     if (this.movement.roll <= 7) {
                         this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(speed * 1.5, true)) * Math.PI * this.movement.roll / 10; // roll
-                        // this.fishObject.rotation.x = Math.sin(this.clock.getElapsedTime()) * 3 + 3
+                    } else {
+                        this.fishObject.rotation.x += 0.009
                     }
 
-                    // // up down
-                    if ( this.score > 3) {
+                    // UP DOWN
+                    if (this.score > 3) {
                         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * 2 + 2
                     }
+                    // SINKING
+                } else {
+                //    // alert(this.fishObject.rotation.y)
+                //     if (this.fishObject.rotation.y > 1.56 && this.rotationDirection.y == '+') {
+                //         this.fishObject.rotation.y += 0.01
+                //     } 
+                //     // else if (this.fishObject.rotation.y  1.56 && this.rotationDirection.y == '-') {
+                //     //     this.fishObject.rotation.y -= 0.01
+                //     // }
+                //     if (this.fishObject.rotation.x < 5) {
+                //         this.fishObject.rotation.x += 0.03
+                //     }
+                //     if (this.fishObject.rotation.x < 5) {
+                //         this.fishObject.rotation.x += 0.03
+                //     }
+                //     console.log(this.fishObject.rotation.x)
                 }
+
             } else {
                 this.playing = false
                 this.defaultPosition()
-                //     if (this.fishObject.rotation.z > -1.5) {
-                //         this.fishObject.rotation.z -= 0.02
-
-                //         // this.fishObject.position.y -= 0.09
-                //     }
-                //     console.log(this.fishObject.rotation.y)
-                //     if (this.fishObject.rotation.y < -0.97) {
-
-                //         this.fishObject.rotation.y += 0.1
-                //    }
-
-                // }
 
             }
             this.renderer.render(this.scene, this.camera);
@@ -573,14 +514,9 @@ export default {
                 this.fishColor = arr[Math.floor(Math.random() * arr.length)];
 
                 this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
-                console.log(this.fishColor)
+                this.fishObject.getObjectByName("Markings_Left").visible = false
+                this.fishObject.getObjectByName("Markings_Right").visible = false
 
-                // console.log(this.fishObject.getObjectByName("Markings_Right").position.y = -1500)
-
-                // make loop here to hide all
-                // this.fishObject.getObjectByName("back_fin_1").visible = true;
-                // this.fishObject.getObjectByName("back_fin_2").visible = false;
-                //
             });
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true });
