@@ -35,7 +35,7 @@
         </template>
         <transition name="fade">
             <footer v-if="!playing" class="footer">
-                {{rotationDirection}}
+               
                 <div v-for="(fin, name, i) in fins" class="fin" :key="i" :class="'fin-'+name">
                     <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
@@ -51,7 +51,7 @@
                  </div> -->
             </footer>
             <footer class="footer--playing" v-else>
-                {{rotationDirection}}
+
                 <img :src="require('@/assets/button-tryagain.svg')" @click="playing = false, hideAllFins()" width="500" />
                 <img :src="require('@/assets/button-swim.svg')" @click="save" width="180" />
             </footer>
@@ -86,11 +86,11 @@ export default {
             playing: false,
             startRotation: {
                 x: 0,
-                y: -1.5,
+                y: 0,
                 z: 0,
             },
             startPosition: {
-                x: 0,
+                x: 5,
                 y: 6.75,
                 z: 0,
             },
@@ -108,7 +108,7 @@ export default {
             ready: false,
             fishObject: "",
             scene: "",
-            fishObjectUlr: require("@/assets/fish-mix.glb"),
+            fishObjectUlr: require("@/assets/fish-test.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
             backFin: "",
             sideFin: "",
@@ -419,7 +419,7 @@ export default {
 
                     // WINDING
                     if (this.movement.smimWind <= 7) {
-                        this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9 - 1.5
+                        this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9 
                     } else {
                         this.fishObject.rotation.y += 0.009
                     }
@@ -437,25 +437,25 @@ export default {
                     }
                     // SINKING
                 } else {
-                //    // alert(this.fishObject.rotation.y)
-                //     if (this.fishObject.rotation.y > 1.56 && this.rotationDirection.y == '+') {
-                //         this.fishObject.rotation.y += 0.01
-                //     } 
-                //     // else if (this.fishObject.rotation.y  1.56 && this.rotationDirection.y == '-') {
-                //     //     this.fishObject.rotation.y -= 0.01
-                //     // }
-                //     if (this.fishObject.rotation.x < 5) {
-                //         this.fishObject.rotation.x += 0.03
-                //     }
-                //     if (this.fishObject.rotation.x < 5) {
-                //         this.fishObject.rotation.x += 0.03
-                //     }
-                //     console.log(this.fishObject.rotation.x)
+                    //    // alert(this.fishObject.rotation.y)
+                    //     if (this.fishObject.rotation.y > 1.56 && this.rotationDirection.y == '+') {
+                    //         this.fishObject.rotation.y += 0.01
+                    //     } 
+                    //     // else if (this.fishObject.rotation.y  1.56 && this.rotationDirection.y == '-') {
+                    //     //     this.fishObject.rotation.y -= 0.01
+                    //     // }
+                    //     if (this.fishObject.rotation.x < 5) {
+                    //         this.fishObject.rotation.x += 0.03
+                    //     }
+                    //     if (this.fishObject.rotation.x < 5) {
+                    //         this.fishObject.rotation.x += 0.03
+                    //     }
+                    //     console.log(this.fishObject.rotation.x)
                 }
 
             } else {
                 this.playing = false
-                this.defaultPosition()
+                // this.defaultPosition()
 
             }
             this.renderer.render(this.scene, this.camera);
@@ -471,12 +471,32 @@ export default {
             // background
             this.scene.background = new Three.Color(0x096ab2);
             // LIGHT
-            const ambientLight = new Three.AmbientLight("#fff", 1.3);
-            const directionalLight = new Three.DirectionalLight(0xffffff, 0.5);
-            const underLight = new Three.DirectionalLight("green", 0.3);
-            underLight.position.y = -200;
-            //underLight.position.x = 20
-            this.scene.add(ambientLight, directionalLight, underLight);
+            // const ambientLight = new Three.AmbientLight("#fff", 1);
+            // const directionalLight = new Three.DirectionalLight(0xffffff, 0.5);
+            // const underLight = new Three.DirectionalLight(0x04D600, 1.000);
+
+            // underLight.position.y = -200;
+            // //underLight.position.x = 20
+            // this.scene.add(ambientLight, directionalLight, underLight);
+
+            var hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
+            hemiLight.position.set(0, 0, 0);
+            this.scene.add(hemiLight);
+
+            var dirLight = new Three.DirectionalLight(0xffffff);
+            dirLight.position.set(0, 300, -75);
+            this.scene.add(dirLight);
+
+            var spotlight = new Three.SpotLight(0x7AADF0, 2);
+            spotlight.position.set(-50, 50, 50);
+            spotlight.castShadow = true;
+
+            spotlight.shadow.bias = -0.0001;
+            spotlight.shadow.mapSize.width = 1024 * 4;
+            spotlight.shadow.mapSize.height = 1024 * 4;
+
+            this.scene.add(spotlight)
+
             const loader = new Three.TextureLoader();
             loader.load(this.backgroundImage, (texture) => {
                 this.scene.background = texture;
@@ -502,7 +522,8 @@ export default {
                 this.fishObject = gltf.scene;
 
                 this.fishObject.castShadow = true;
-                this.fishScale = 4;
+                this.fishScale = 0.05;
+
                 // this.fishObject.rotation.y = 11
                 this.scene.add(this.fishObject);
                 this.defaultPosition();
@@ -519,8 +540,9 @@ export default {
 
             });
             // RENDER
-            this.renderer = new Three.WebGLRenderer({ antialias: true });
+            this.renderer = new Three.WebGLRenderer({ antialias: true, });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
+            this.renderer.outputEncoding = Three.sRGBEncoding;
             container.appendChild(this.renderer.domElement);
             setTimeout(() => {
                 this.changeSpeed(0);
@@ -675,33 +697,33 @@ export default {
 }
 
 .finDrop.dorsal {
-    top: 148px;
-    right: 845px;
+    top: 130px;
+    right: 950px;
 }
 
 .finDrop.pectoral {
-    top: 297px;
-    right: 776px;
+    top: 350px;
+    left: 674px;
 }
 
 .finDrop.tail {
-    top: 275px;
-    left: 500px;
+    top: 284px;
+    right: 468px;
 }
 
 .finDrop.anal {
-    top: 345px;
-    left: 679px;
+top: 372px;
+    right: 700px;
 }
 
 .finDrop.body {
     top: 195px;
-    left: 679px;
+     right: 679px;
 }
 
 .finDrop.pelvic {
-    top: 425px;
-    left: 1071px;
+top: 425px;
+    left: 880px;
     z-index: 0;
 }
 
