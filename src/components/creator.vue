@@ -479,23 +479,60 @@ export default {
             // //underLight.position.x = 20
             // this.scene.add(ambientLight, directionalLight, underLight);
 
-            var hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
-            hemiLight.position.set(0, 0, 0);
-            this.scene.add(hemiLight);
+            // var hemiLight = new Three.HemisphereLight(0xffffff, 0x444444);
+            // hemiLight.position.set(0, 0, 0);
+            // this.scene.add(hemiLight);
 
-            var dirLight = new Three.DirectionalLight(0xffffff);
-            dirLight.position.set(0, 300, -75);
-            this.scene.add(dirLight);
+            // var dirLight = new Three.DirectionalLight(0xffffff);
+            // dirLight.position.set(0, 300, -75);
+            // this.scene.add(dirLight);
 
-            var spotlight = new Three.SpotLight(0x7AADF0, 2);
-            spotlight.position.set(-50, 50, 50);
-            spotlight.castShadow = true;
+            // var spotlight = new Three.SpotLight(0x7AADF0, 2);
+            // spotlight.position.set(-50, 50, 50);
+            // spotlight.castShadow = true;
 
-            spotlight.shadow.bias = -0.0001;
-            spotlight.shadow.mapSize.width = 1024 * 4;
-            spotlight.shadow.mapSize.height = 1024 * 4;
+            // spotlight.shadow.bias = -0.0001;
+            // spotlight.shadow.mapSize.width = 1024 * 4;
+            // spotlight.shadow.mapSize.height = 1024 * 4;
 
-            this.scene.add(spotlight)
+            // LIGHTS
+	//	const hemiLight = new Three.HemisphereLight( '0453DC', 0x04AF40, 2 );
+				const hemiLight = new Three.HemisphereLight( 0xffffff, '04AF40', 2 );
+				hemiLight.color.setHSL( 0.6, 1, 0.6 );
+				hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+				hemiLight.position.set( 0, 50, 0 );
+				this.scene.add( hemiLight );
+
+				const hemiLightHelper = new Three.HemisphereLightHelper( hemiLight, 10 );
+				this.scene.add( hemiLightHelper );
+
+				//
+
+				const dirLight = new Three.DirectionalLight( 0xffffff, 1 );
+				dirLight.color.setHSL( 0.1, 1, 0.95 );
+				dirLight.position.set( - 1, 1.75, 1 );
+				dirLight.position.multiplyScalar( 30 );
+				this.scene.add( dirLight );
+
+				dirLight.castShadow = true;
+
+				dirLight.shadow.mapSize.width = 2048;
+				dirLight.shadow.mapSize.height = 2048;
+
+				const d = 50;
+
+				dirLight.shadow.camera.left = - d;
+				dirLight.shadow.camera.right = d;
+				dirLight.shadow.camera.top = d;
+				dirLight.shadow.camera.bottom = - d;
+
+				dirLight.shadow.camera.far = 3500;
+				dirLight.shadow.bias = - 0.0001;
+
+				const dirLightHelper = new Three.DirectionalLightHelper( dirLight, 10 );
+			//	this.scene.add( dirLightHelper );
+
+            
 
             const loader = new Three.TextureLoader();
             loader.load(this.backgroundImage, (texture) => {
