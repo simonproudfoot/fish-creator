@@ -8,8 +8,8 @@ function animate() {
     }
     if (this.playing && this.allFish[0] != undefined) {
         if (this.playing) {
-            if (this.camera.position.x < 400) {
-                this.camera.position.x += 0.05
+            if (this.camera.position.x > 0) {
+                this.camera.position.x -= 0.05
             }
             this.allFish.forEach((selectedFish, i) => {
                 if (selectedFish.score <= 3) {
@@ -19,7 +19,7 @@ function animate() {
                 }
                 // WINDING
                 if (selectedFish.movement.smimWind <= 7) {
-                    selectedFish.rotation.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.smimWind / 9 - 1.5
+                    selectedFish.rotation.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.smimWind / 9
                 } else {
                     selectedFish.rotation.y += 0.009
                 }
@@ -30,14 +30,14 @@ function animate() {
                     selectedFish.rotation.x += 0.009
                 }
                 // UP DOWN
-                if (this.camera.position.x < 400 && move && i == 0) {
+                if (this.camera.position.x > 0 && move && i == 0) {
                     if (i == 0) {
-                        selectedFish.position.x += 0.05
+                        selectedFish.position.x -= 0.05
                     }
                 }
             })
         } else {
-            // this.playing = false
+             this.playing = false
             // this.defaultPosition()
         }
         // if (this.camera.position.z < 450) {

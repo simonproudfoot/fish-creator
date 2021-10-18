@@ -3,9 +3,9 @@
     <div id="container">
 
         <dat-gui v-if="gui && allFish[0]" closeText="Close controls" openText="Open controls" closePosition="bottom">
+            <dat-number v-if="allFish[0]" v-model="allFish[0].scale.y" label="scale" />
             <dat-number v-if="allFish[0].movement.roll" v-model="allFish[0].movement.roll" label="Roll" />
             <dat-number v-if="allFish[0].movement.smimWind" v-model="allFish[0].movement.smimWind" label="smimWind" />
-
             <dat-number v-if="allFish[0].movement.updown" v-model="allFish[0].movement.updown" label="Updown" />
             <dat-string v-else v-model="allFish[0].movement.updown" label="upDown" />
 
@@ -40,8 +40,8 @@ export default {
     data() {
         return {
             allFish: [],
-            gui: false,
-            fishScale: 1,
+            gui: true,
+            fishScale: 0.3,
             playing: false,
             startRotation: {
                 x: 0,
@@ -69,7 +69,7 @@ export default {
             ready: false,
             fishObject: "",
             scene: "",
-            fishObjectUlr: require("@/assets/fish-mix.glb"),
+            fishObjectUlr: require("@/assets/fish-main.gltf"),
             backgroundImage: require("@/assets/underwater.jpg"),
             backFin: "",
             sideFin: "",
@@ -168,17 +168,26 @@ export default {
             let container = document.getElementById("container");
             // camera
             this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 1000); // last is depth
-            this.camera.position.set(-100, 0, 410); // 450
+            this.camera.position.set(400, 0, 410); // 450
             this.scene = new Three.Scene();
             // background
             this.scene.background = new Three.Color(0x096ab2);
+
             // LIGHT
-            const ambientLight = new Three.AmbientLight("#fff", 1.3);
-            const directionalLight = new Three.DirectionalLight(0xffffff, 0.2);
-            const underLight = new Three.DirectionalLight("green", 0.3);
-            underLight.position.y = -200;
-            //underLight.position.x = 20
-            this.scene.add(ambientLight, directionalLight);
+            const light = new Three.HemisphereLight(0x36d7ff, 0x09ba00, 1);
+            light.groundColor.setHex(0x3eba00);
+            light.color.setHex(0x00f5dc);
+
+            this.scene.add(light);
+
+            //
+
+            const dirLight = new Three.DirectionalLight(0xffffff, 0.7);
+            dirLight.color.setHex(0xffffff);
+            dirLight.position.set(-1, 1.75, 70);
+            dirLight.position.multiplyScalar(30);
+            this.scene.add(dirLight);
+
             // fog 
             const near = 20;
             const far = 200;
@@ -215,47 +224,50 @@ export default {
             this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
                 gltfLoader.load(this.fishObjectUlr, (gltf) => {
                     this.mixer = new Three.AnimationMixer(gltf.scene);
-                    gltf.animations.forEach((clip) => {
-                        this.mixer.clipAction(clip).play();
-                    });
-                    this.mixer.timeScale = 1;
+                    // gltf.animations.forEach((clip) => {
+                    //     this.mixer.clipAction(clip).play();
+                    // });
+                    //   this.mixer.timeScale = 1;
                     gltf.castShadow = true;
                     //  this.hideAllFins();
                     this.allFish.push(gltf.scene);
-        
 
                     Object.assign(this.allFish[i], { movement: fish.movement });
                     Object.assign(this.allFish[i], { score: fish.score });
+                    this.allFish[i].scale.set(0.006, 0.006, 0.006)
+
                     this.scene.add(this.allFish[i]);
-                 //   this.allFish[i].position.z = 10
-                    this.allFish[i].getObjectByName("Body_SDS_1_2").material.color.setHex(fish.color);
-                    this.allFish[i].rotation.y = -1.5
+                    //   this.allFish[i].position.z = 10
+                    //   this.allFish[i].getObjectByName("Body_SDS_1_2").material.color.setHex(fish.color);
+                    //this.allFish[i].rotation.y = -1.5
                     if (i != 0) {
-                       // this.allFish[i].castShadow = true
+                        // this.allFish[i].castShadow = true
 
                         this.allFish[i].position.x = Math.random() * (100 - -100) + -100;
                         this.allFish[i].position.y = Math.random() * (10 - -10) + -10;
                         this.allFish[i].position.z = Math.random() * (340 - 240) + 240;
 
-                        
                         // if (i % 2 == 0) {
                         //     this.allFish[i].rotation.y = 1.5
                         // }
+
                     } else {
                         this.allFish[i].position.z = 350
-                        this.allFish[i].position.x = -100
+                        this.allFish[i].position.x = 400
                     }
-                    this.allFish[i].getObjectByName("Markings_Left").visible = false
-                    this.allFish[i].getObjectByName("Markings_Right").visible = false
-                    this.hideShowAllFins(i, fish)
+                    //    this.allFish[i].getObjectByName("Markings_Left").visible = false
+                    //    this.allFish[i].getObjectByName("Markings_Right").visible = false
+                    //    this.hideShowAllFins(i, fish)
 
                     this.playing = true
                     // this.defaultPosition();
                 });
             })
             // RENDER
+
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
+            this.renderer.outputEncoding = Three.sRGBEncoding;
             container.appendChild(this.renderer.domElement);
             setTimeout(() => {
                 this.changeSpeed(0);

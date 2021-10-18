@@ -66,7 +66,7 @@ function init() {
                 this.mixer.clipAction(clip).play();
             });
             this.mixer.timeScale = 1;
-            gltf.castShadow = true;
+            gltf.castShadow = false;
             this.allFish.push(gltf.scene);
             var i = this.allFish.length - 1
 
