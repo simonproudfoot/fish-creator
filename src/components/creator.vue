@@ -1,20 +1,16 @@
 <template>
 <div class="" style="position: relative">
-
     <!-- <pre>{{movement}}</pre>
     <h1>{{score}}</h1> -->
     <div id="container">
         <dat-gui v-if="gui" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-folder label="Fish position" v-if="fishObject">
-
                 <dat-string v-model="fishColor"></dat-string>
-
                 <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
                 <dat-number v-model="allFish[0].scale.y" :min="-100" :max="100" :step="0.01" label="Y" /> -->
                 <dat-number v-model="fishObject.position.x" :min="-70" :max="53" :step="1" label="X" />
                 <dat-number v-model="fishObject.position.y" :min="-10" :max="10" :step="1" label="Y" />
                 <dat-number v-model="fishObject.position.z" :min="0" :max="400" :step="1" label="Z" />
-
                 <dat-number v-model="fishObject.rotation.y" :min="-100" :max="100" :step="0.01" label="RotateY" />
                 <dat-number v-model="fishObject.rotation.x" :min="-100" :max="100" :step="0.01" label="RotateX" />
                 <dat-number v-model="fishObject.rotation.z" :min="-100" :max="100" :step="0.01" label="RotateZ" />
@@ -26,16 +22,13 @@
                 <dat-number v-model="camera.position.x" :min="-100" :max="400" :step="0.01" label="LEFT RIGHT" />
                 <dat-number v-model="camera.position.y" :min="-25" :max="25" :step="0.01" label="P Y" />
                 <dat-number v-model="camera.position.z" :min="45" :max="684" :step="1" label="zoom in/out" />
-
             </dat-folder>
         </dat-gui>
-
         <template v-if="!playing">
             <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
         </template>
         <transition name="fade">
             <footer v-if="!playing" class="footer">
-
                 <div v-for="(fin, name, i) in fins" class="fin" :key="i" :class="'fin-'+name">
                     <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
@@ -51,12 +44,10 @@
                  </div> -->
             </footer>
             <footer class="footer--playing" v-else>
-
                 <img :src="require('@/assets/button-tryagain.svg')" @click="playing = false, hideAllFins()" width="500" />
                 <img :src="require('@/assets/button-swim.svg')" @click="save" width="180" />
             </footer>
         </transition>
-
     </div>
 </div>
 </template>
@@ -68,7 +59,7 @@ export default {
     name: "ThreeTest",
     data() {
         return {
-            gui: true,
+            gui: false,
             rotationDirection: {
                 x: '',
                 y: '',
@@ -115,6 +106,7 @@ export default {
             topFin: "",
             swimSpeed: 3,
             sinking: false,
+
             fins: {
                 // force - the less it is, the more control it has. 
                 // put 4 for average/no difference
@@ -165,7 +157,6 @@ export default {
                     roll: 0,
                     updown: 4,
                 },
-
             },
             movement: {
                 smimWind: 8,
@@ -183,7 +174,6 @@ export default {
             })
             return correct
         }
-
     },
     watch: {
         'fishObject.rotation.x'(newVal, old) {
@@ -219,13 +209,11 @@ export default {
                         this.movement.updown = 8
                         this.movement.smimWind = 8
                     }, 500);
-
             }
         },
         fishScale(x) {
             this.fishObject.scale.set(x, x, x);
         },
-
         // ROLL FINS 
         'fins.dorsal.selected'(val) {
             if (val == 'dorsal') {
@@ -240,7 +228,6 @@ export default {
             } else {
                 this.movement.roll = this.movement.roll + 5
             }
-
         },
         'fins.pectoral.selected'(val) {
             if (val == 'pectoral') {
@@ -248,7 +235,6 @@ export default {
             } else {
                 this.movement.roll = this.movement.roll + 1
             }
-
         },
         'fins.tail.selected'(val) {
             if (val == 'tail') {
@@ -257,7 +243,6 @@ export default {
                 this.movement.smimWind = this.movement.smimWind + 5
             }
         },
-
         // UP DOWN FINS
         'fins.pelvic.selected'(val) {
             if (val == 'pelvic') {
@@ -265,17 +250,12 @@ export default {
             } else {
                 this.movement.updown = this.movement.updown + 5
             }
-
         },
-
     },
-
     methods: {
         async save() {
-
             let final = {}
             let i = 0
-
             Object.entries(this.fins).forEach(x => {
                 let key = x[0]
                 let val = x[1].selected
@@ -283,20 +263,15 @@ export default {
                     [key]: val
                 });
             })
-
             Object.assign(final, { color: this.fishColor })
             Object.assign(final, { movement: this.movement })
             Object.assign(final, { score: this.score })
-
             await this.$store.commit('ADD_FISH', final)
             await this.$store.commit('SET_VIEW', 'fishtank')
-
             if (this.$store.state.fishes.length > 4) {
                 this.$store.state.fishes.pop()
             }
-
             localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
-
         },
         flipit() {
             var newFin = this.fishObject
@@ -369,14 +344,12 @@ export default {
             this.fishObject.position.x = this.startPosition.x;
             this.fishObject.position.z = this.startPosition.z;
         },
-
         showFin(position) {
             this.fins[position.split('-').pop()].selected = this.draggingFin
             Object.keys(this.fins).forEach((x) => {
                 let name = position + "_fin-" + x;
                 let active = position + "_fin-" + this.draggingFin;
                 //this.fins[position].selected = this.draggingFin
-
                 if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
                 } else {
@@ -390,13 +363,22 @@ export default {
         hideAllFins() {
             this.resetFins()
             // FINS
+
             Object.keys(this.fins).forEach((element) => {
                 Object.keys(this.fins).forEach((y) => {
                     var name = "pos-" + element + "_fin-" + y;
-                    //    console.log(name)
+                    var right = "pos-" + element + "_fin-" + y + '_right';
+
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
                     }
+
+                    if (element == 'pectoral' || element == 'pelvic') {
+                        if (this.fishObject.getObjectByName(right)) {
+                            this.fishObject.getObjectByName(right).visible = false;
+                        }
+                    }
+
                 });
             });
         },
@@ -408,10 +390,9 @@ export default {
             if (this.mixer && this.fishObject) {
                 this.mixer.update(delta);
             }
+            // this.fishObject.rotation.y += 0.009
             if (this.playing) {
-
                 if (this.fishObject.position.y > -18.5) {
-
                     if (this.score <= 3 && this.score >= 2) {
                         this.fishObject.position.y -= 0.025
                     } else if (this.score <= 2) {
@@ -419,21 +400,18 @@ export default {
                     } else {
                         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown * 2
                     }
-
                     // WINDING
                     if (this.movement.smimWind <= 7) {
                         this.fishObject.rotation.y = Math.sin(this.clock.getElapsedTime()) * this.movement.smimWind / 9
                     } else {
                         this.fishObject.rotation.y += 0.009
                     }
-
                     // ROLL
                     if (this.movement.roll <= 7) {
                         this.fishObject.rotation.x = this.fishObject.rotation.x = Math.sin(Date.now() * this.convertDecimal(speed * 1.5, true)) * Math.PI * this.movement.roll / 10; // roll
                     } else {
                         this.fishObject.rotation.x += 0.009
                     }
-
                     // UP DOWN
                     if (this.score > 3) {
                         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * 2 + 2
@@ -455,11 +433,9 @@ export default {
                     //     }
                     //     console.log(this.fishObject.rotation.x)
                 }
-
             } else {
                 this.playing = false
                 // this.defaultPosition()
-
             }
             this.renderer.render(this.scene, this.camera);
         },
@@ -467,47 +443,33 @@ export default {
             let container = document.getElementById("container");
             // camera
             this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 1000); // last is depth
-
             this.camera.position.set(0, -1.21, 239); // 450
-
             this.scene = new Three.Scene();
             // background
             this.scene.background = new Three.Color(0x096ab2);
-           
-
             // LIGHTS
             //	const hemiLight = new Three.HemisphereLight( '0453DC', 0x04AF40, 2 );
             const hemiLight = new Three.HemisphereLight(0xffffbb, 0x080820, 1);
-
             hemiLight.color.setHex(0x70AFE1);
             hemiLight.groundColor.setHex(0x0C9204);
             hemiLight.position.set(0, 50, 0);
             this.scene.add(hemiLight);
-
-          
-
             const dirLight = new Three.DirectionalLight(0xffffff, 1);
             dirLight.color.setHex(0xffffff);
             dirLight.position.set(-1, 1.75, 10);
             dirLight.position.multiplyScalar(30);
             this.scene.add(dirLight);
-
             dirLight.shadow.mapSize.width = 2048;
             dirLight.shadow.mapSize.height = 2048;
-
             const d = 50;
-
             dirLight.shadow.camera.left = -d;
             dirLight.shadow.camera.right = d;
             dirLight.shadow.camera.top = d;
             dirLight.shadow.camera.bottom = -d;
-
             dirLight.shadow.camera.far = 3500;
             dirLight.shadow.bias = -0.0001;
-
             const dirLightHelper = new Three.DirectionalLightHelper(dirLight, 10);
-          //  this.scene.add(dirLightHelper);
-
+            //  this.scene.add(dirLightHelper);
             const loader = new Three.TextureLoader();
             loader.load(this.backgroundImage, (texture) => {
                 this.scene.background = texture;
@@ -516,7 +478,6 @@ export default {
             const gltfLoader = new GLTFLoader();
             gltfLoader.load(this.fishObjectUlr, (gltf) => {
                 this.mixer = new Three.AnimationMixer(gltf.scene);
-
                 // clones element to other side - need to find out how to duplicatge mixer
                 // var newFin = gltf.scene.getObjectByName('pos-pectoral_fin-tail').clone()
                 // newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
@@ -524,31 +485,25 @@ export default {
                 // gltf.scene.add(newFin)
                 // console.log(newFin)
                 // // real id 25
-
                 //console.log( gltf.animations)//.getObjectByName('pos-pectoral_fin-tailAction'))
                 gltf.animations.forEach((clip) => {
                     this.mixer.clipAction(clip).play();
                 });
                 this.mixer.timeScale = 0;
                 this.fishObject = gltf.scene;
-
                 this.fishObject.castShadow = true;
                 this.fishScale = 0.05;
-
                 // this.fishObject.rotation.y = 11
                 this.scene.add(this.fishObject);
                 this.defaultPosition();
                 this.hideAllFins();
                 //   this.fishObject.getObjectByName("body").visible = false;
-
-                // this.fishObject.getObjectByName("Body_SDS_1_2").material.flatShading = true
+                // this.fishObject.getObjectByName("Body_SDS_1_2").'material'.flatShading = true
                 var arr = ['0x3a911a', '0xad821c', '0x154d59']
                 this.fishColor = arr[Math.floor(Math.random() * arr.length)];
-
-                this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
+                //   this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
                 this.fishObject.getObjectByName("Markings_Left").visible = false
                 this.fishObject.getObjectByName("Markings_Right").visible = false
-
             });
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -566,7 +521,6 @@ export default {
     mounted() {
         this.init();
         this.animate();
-
     },
 };
 </script>
@@ -654,7 +608,6 @@ export default {
     left: 0;
     right: 0;
     justify-content: space-between;
-
 }
 
 .test {
@@ -745,7 +698,6 @@ export default {
 .fin-anal,
 .fin-body {
     opacity: 0.5;
-
 }
 
 h3 {
