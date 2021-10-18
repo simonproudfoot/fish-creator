@@ -106,7 +106,6 @@ export default {
             topFin: "",
             swimSpeed: 3,
             sinking: false,
-
             fins: {
                 // force - the less it is, the more control it has. 
                 // put 4 for average/no difference
@@ -349,11 +348,22 @@ export default {
             Object.keys(this.fins).forEach((x) => {
                 let name = position + "_fin-" + x;
                 let active = position + "_fin-" + this.draggingFin;
-                //this.fins[position].selected = this.draggingFin
+                var right = position + "_fin-" + this.draggingFin + '_right';
                 if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
+
+                    if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
+                        this.fishObject.getObjectByName(name + '_right').visible = false;
+                    }
+
                 } else {
                     this.fishObject.getObjectByName(active).visible = true;
+                    // show other side
+                    if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
+                        if (right != undefined) {
+                            this.fishObject.getObjectByName(right).visible = true;
+                        }
+                    }
                 }
             });
         },
@@ -363,22 +373,18 @@ export default {
         hideAllFins() {
             this.resetFins()
             // FINS
-
             Object.keys(this.fins).forEach((element) => {
                 Object.keys(this.fins).forEach((y) => {
                     var name = "pos-" + element + "_fin-" + y;
                     var right = "pos-" + element + "_fin-" + y + '_right';
-
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
                     }
-
                     if (element == 'pectoral' || element == 'pelvic') {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
                         }
                     }
-
                 });
             });
         },
