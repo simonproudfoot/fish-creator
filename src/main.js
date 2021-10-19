@@ -7,9 +7,10 @@ import DatGui from '@cyrilf/vue-dat-gui'
 Vue.use(DatGui)
 const store = new Vuex.Store({
   state: {
-    view: 'creator',
-    // position : finSelected
-    fishes: []
+    view: 'attractor',
+    finInfo: '',
+    fishes: [],
+    howto: false
   },
   mutations: {
     ADD_FISH(state, val) {
@@ -17,6 +18,12 @@ const store = new Vuex.Store({
     },
     SET_VIEW(state, val) {
       state.view = val
+    },
+    SET_FININFO(state, val) {
+      state.finInfo = val
+    },
+    SET_HOWTO(state, val) {
+      state.howto = val
     }
   }
 })

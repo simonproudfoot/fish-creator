@@ -1,5 +1,12 @@
 <template>
-<div class="" style="position: relative">
+<div style="position: relative;">
+    <video v-if="playing" muted autoplay :src="require('@/assets/attractor.mp4')"></video>
+    <div v-else class="videoLoading">
+        <!-- <img :src="require('@/assets/loader.gif')" /> -->
+        <span>
+            <h1>Loading...</h1>
+        </span>
+    </div>
     <div id="container">
 
         <dat-gui v-if="gui && allFish[0]" closeText="Close controls" openText="Open controls" closePosition="bottom">
@@ -40,7 +47,7 @@ export default {
     data() {
         return {
             allFish: [],
-            gui: true,
+            gui: false,
             fishScale: 0.3,
             playing: false,
             startRotation: {
@@ -151,6 +158,11 @@ export default {
                     var name = "pos-" + element + "_fin-" + y;
                     if (this.allFish[fishIndex].getObjectByName(name)) {
                         this.allFish[fishIndex].getObjectByName(name).visible = false;
+
+                    }
+                    if (this.allFish[fishIndex].getObjectByName(name + '_right')) {
+                        this.allFish[fishIndex].getObjectByName(name + '_right').visible = false;
+
                     }
                 });
             });
@@ -158,6 +170,9 @@ export default {
                 var active = 'pos-' + x[0] + '_' + 'fin-' + x[1]
                 if (this.allFish[fishIndex].getObjectByName(active)) {
                     this.allFish[fishIndex].getObjectByName(active).visible = true;
+                }
+                 if (this.allFish[fishIndex].getObjectByName(active+'_right')) {
+                    this.allFish[fishIndex].getObjectByName(active+'_right').visible = true;
                 }
             })
 
@@ -171,7 +186,7 @@ export default {
             this.camera.position.set(400, 0, 410); // 450
             this.scene = new Three.Scene();
             // background
-            this.scene.background = new Three.Color(0x096ab2);
+            this.scene.background = null
 
             // LIGHT
             const light = new Three.HemisphereLight(0x36d7ff, 0x09ba00, 1);
@@ -193,31 +208,6 @@ export default {
             const far = 200;
             const color = '#2a8f99';
             this.scene.fog = new Three.Fog(color, near, far);
-            //  this.scene.background = new Three.Color(color);
-            var loader = new Three.TextureLoader();
-            var sections = 6
-            var texture = loader.load(this.backgroundImage, function (texture) {
-                texture.wrapS = texture.wrapT = Three.RepeatWrapping;
-                texture.offset.set(0, 0);
-                texture.repeat.set(sections, 1);
-            });
-            var material = new Three.MeshPhongMaterial({
-                color: 0xffffff,
-                specular: 0x111111,
-                fog: false,
-                shininess: 10,
-                map: texture,
-            });
-            // height . width
-            var geometry = new Three.PlaneGeometry(90 * sections, 40);
-            this.background = new Three.Mesh(geometry, material);
-            var offset = sections * 90 * 2
-
-            this.background.position.y = 0
-            this.background.position.z = -30
-            this.background.scale.y = 2.16
-            this.background.scale.x = 2
-            this.scene.add(this.background);
 
             // Load object
             const gltfLoader = new GLTFLoader();
@@ -229,7 +219,7 @@ export default {
                     // });
                     //   this.mixer.timeScale = 1;
                     gltf.castShadow = true;
-                    //  this.hideAllFins();
+                    //this.hideAllFins();
                     this.allFish.push(gltf.scene);
 
                     Object.assign(this.allFish[i], { movement: fish.movement });
@@ -237,9 +227,7 @@ export default {
                     this.allFish[i].scale.set(0.006, 0.006, 0.006)
 
                     this.scene.add(this.allFish[i]);
-                    //   this.allFish[i].position.z = 10
-                    //   this.allFish[i].getObjectByName("Body_SDS_1_2").material.color.setHex(fish.color);
-                    //this.allFish[i].rotation.y = -1.5
+
                     if (i != 0) {
                         // this.allFish[i].castShadow = true
 
@@ -247,17 +235,12 @@ export default {
                         this.allFish[i].position.y = Math.random() * (10 - -10) + -10;
                         this.allFish[i].position.z = Math.random() * (340 - 240) + 240;
 
-                        // if (i % 2 == 0) {
-                        //     this.allFish[i].rotation.y = 1.5
-                        // }
-
                     } else {
                         this.allFish[i].position.z = 350
                         this.allFish[i].position.x = 400
                     }
-                    //    this.allFish[i].getObjectByName("Markings_Left").visible = false
-                    //    this.allFish[i].getObjectByName("Markings_Right").visible = false
-                    //    this.hideShowAllFins(i, fish)
+
+                    this.hideShowAllFins(i, fish)
 
                     this.playing = true
                     // this.defaultPosition();
@@ -265,9 +248,10 @@ export default {
             })
             // RENDER
 
-            this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            this.renderer = new Three.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
             this.renderer.outputEncoding = Three.sRGBEncoding;
+            this.renderer.setClearColor(0x000000, 0); // the default
             container.appendChild(this.renderer.domElement);
             setTimeout(() => {
                 this.changeSpeed(0);
@@ -283,6 +267,26 @@ export default {
 </script>
 
 <style scoped>
+video,
+.videoLoading {
+    position: absolute;
+    width: 1920px;
+    height: 1080px;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    display: block;
+    background-color: #40a5b1;
+}
+
+.videoLoading span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
 footer {
     background-color: #a0d3d796;
 }
@@ -300,7 +304,7 @@ footer {
     position: relative;
     width: 1920px;
     height: 1080px;
-    color: #06909c;
+
 }
 
 .controls {

@@ -1,8 +1,12 @@
 <template>
 <div class="" style="position: relative">
-    <!-- <pre>{{movement}}</pre>
-    <h1>{{score}}</h1> -->
-    <div id="container">
+
+    <!--<h1>{{score}}</h1> -->
+    <div id="container" style="">
+        <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
+        <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
+        <img v-if="!playing" class="close" :src="require('@/assets/home.svg')" @click="$store.commit('SET_VIEW', 'attractor')" />
+        <div v-if="!playing" class="howto button small aqua" @click="$store.commit('SET_HOWTO', true)">Help {{draggingFin}}</div>
         <dat-gui v-if="gui" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-folder label="Fish position" v-if="fishObject">
                 <dat-string v-model="fishColor"></dat-string>
@@ -24,7 +28,7 @@
                 <dat-number v-model="camera.position.z" :min="45" :max="684" :step="1" label="zoom in/out" />
             </dat-folder>
         </dat-gui>
-        <template v-if="!playing">
+        <template v-if="!playing && draggingFin">
             <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
         </template>
         <transition name="fade">
@@ -33,32 +37,41 @@
                     <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
                     </div>
-                    <h3>
-                        <img @click="notReady" :src="require('@/assets/info.svg')" />{{name}}
+                    <h3 @click="$store.commit('SET_FININFO', name)">
+                        <img :src="require('@/assets/info.svg')" />{{name}}
                         fin
                     </h3>
                 </div>
-                <img :src="require('@/assets/test.svg')" class="test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null" />
+                <div class="button green test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">Test!</div>
+                <!-- <img :src="require('@/assets/test.svg')" class="test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null" /> -->
                 <!-- <div class="fin__select test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">
                     {{ playing ? "STOP" : "TEST" }}
                  </div> -->
             </footer>
             <footer class="footer--playing" v-else>
-                <img :src="require('@/assets/button-tryagain.svg')" @click="playing = false, hideAllFins()" width="500" />
-                <img :src="require('@/assets/button-swim.svg')" @click="save" width="180" />
+                <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Try a different fin selection</div>
+                <div class="button green" v-if="score >3 && !saving" @click="save">Swim!</div>
             </footer>
         </transition>
     </div>
+    <fininfo v-if="$store.state.finInfo.length" />
+    <howto v-if="$store.state.howto" />
 </div>
 </template>
 
 <script>
 import * as Three from "three";
+import fininfo from './fininfo.vue'
+import howto from './howto.vue'
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 export default {
     name: "ThreeTest",
+    components: { fininfo, howto },
     data() {
         return {
+            saving: false,
+            fail: false,
+            finInfo: '',
             gui: false,
             rotationDirection: {
                 x: '',
@@ -99,7 +112,7 @@ export default {
             ready: false,
             fishObject: "",
             scene: "",
-            fishObjectUlr: require("@/assets/fish-main.gltf"),
+            fishObjectUlr: require("@/assets/fish-final.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
             backFin: "",
             sideFin: "",
@@ -175,6 +188,11 @@ export default {
         }
     },
     watch: {
+        saving(val) {
+            if (val) {
+                this.fishObject.visible = false
+            }
+        },
         'fishObject.rotation.x'(newVal, old) {
             if (newVal > old) {
                 this.rotationDirection.x = '+'
@@ -199,6 +217,12 @@ export default {
         playing(x) {
             if (x) {
                 this.changeSpeed(1)
+                if (this.score <= 3) {
+                    setTimeout(() => {
+                        this.fail = true
+                    }, 1000);
+
+                }
             } else {
                 //  alert
                 this.defaultPosition()
@@ -252,25 +276,33 @@ export default {
         },
     },
     methods: {
-        async save() {
-            let final = {}
-            let i = 0
-            Object.entries(this.fins).forEach(x => {
-                let key = x[0]
-                let val = x[1].selected
-                Object.assign(final, {
-                    [key]: val
-                });
-            })
-            Object.assign(final, { color: this.fishColor })
-            Object.assign(final, { movement: this.movement })
-            Object.assign(final, { score: this.score })
-            await this.$store.commit('ADD_FISH', final)
-            await this.$store.commit('SET_VIEW', 'fishtank')
-            if (this.$store.state.fishes.length > 4) {
-                this.$store.state.fishes.pop()
-            }
-            localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
+        closePop() {
+            this.finInfo = ''
+        },
+        save() {
+            this.saving = true
+            setTimeout(async () => {
+                let final = {}
+                let i = 0
+                Object.entries(this.fins).forEach(x => {
+                    let key = x[0]
+                    let val = x[1].selected
+                    Object.assign(final, {
+                        [key]: val
+                    });
+                })
+                console.log(final)
+                Object.assign(final, { color: this.fishColor })
+                Object.assign(final, { movement: this.movement })
+                Object.assign(final, { score: this.score })
+                await this.$store.commit('ADD_FISH', final)
+                await this.$store.commit('SET_VIEW', 'fishtank')
+                if (this.$store.state.fishes.length > 4) {
+                    this.$store.state.fishes.pop()
+                }
+                localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
+            }, 1500);
+
         },
         flipit() {
             var newFin = this.fishObject
@@ -283,21 +315,20 @@ export default {
             alert("not ready");
         },
         dEnter(val) {
-            val.target.style.background = "transparent";
-            val.target.style.transform = "scale(1.2)";
-            val.target.style.boxShadow = "none";
+            val.target.style.backgroundColor = '#fff';
+            val.target.style.transform = "scale(1.4)";
         },
         dLeave(val) {
-            val.target.style.background = "#e1f6f5a9";
-            val.target.style.transform = "scale(1)";
-            val.target.style.boxShadow = "0px 5px 4px 0px #408E9A";
+            val.target.style.backgroundColor = 'transparent';
+            val.target.style.transform = "initial";
         },
         dropFin(val, element) {
             this.showFin(val);
             element.target.style.background = "transparent";
-            setTimeout(() => {
-                this.draggingFin = "";
-            }, 2000);
+
+            element.target.style.backgroundColor = 'transparent';
+            element.target.style.transform = "initial";
+
         },
         inMotion(fin) {
             this.draggingFin = fin;
@@ -351,11 +382,10 @@ export default {
                 var right = position + "_fin-" + this.draggingFin + '_right';
                 if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
-
                     if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
-                        this.fishObject.getObjectByName(name + '_right').visible = false;
+                     //   alert(name + '_right')
+                     this.fishObject.getObjectByName(name + '_right').visible = false;
                     }
-
                 } else {
                     this.fishObject.getObjectByName(active).visible = true;
                     // show other side
@@ -366,6 +396,7 @@ export default {
                     }
                 }
             });
+            this.draggingFin = "";
         },
         resetFins() {
             Object.values(this.fins).forEach(x => x.selected = '')
@@ -420,6 +451,7 @@ export default {
                     }
                     // UP DOWN
                     if (this.score > 3) {
+
                         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * 2 + 2
                     }
                     // SINKING
@@ -441,6 +473,7 @@ export default {
                 }
             } else {
                 this.playing = false
+                this.fail = false
                 // this.defaultPosition()
             }
             this.renderer.render(this.scene, this.camera);
@@ -492,10 +525,10 @@ export default {
                 // console.log(newFin)
                 // // real id 25
                 //console.log( gltf.animations)//.getObjectByName('pos-pectoral_fin-tailAction'))
-                gltf.animations.forEach((clip) => {
-                    this.mixer.clipAction(clip).play();
-                });
-                this.mixer.timeScale = 0;
+                // gltf.animations.forEach((clip) => {
+                //     this.mixer.clipAction(clip).play();
+                // });
+                // this.mixer.timeScale = 0;
                 this.fishObject = gltf.scene;
                 this.fishObject.castShadow = true;
                 this.fishScale = 0.05;
@@ -508,8 +541,8 @@ export default {
                 var arr = ['0x3a911a', '0xad821c', '0x154d59']
                 this.fishColor = arr[Math.floor(Math.random() * arr.length)];
                 //   this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
-                this.fishObject.getObjectByName("Markings_Left").visible = false
-                this.fishObject.getObjectByName("Markings_Right").visible = false
+                // this.fishObject.getObjectByName("Markings_Left").visible = false
+                //this.fishObject.getObjectByName("Markings_Right").visible = false
             });
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -527,6 +560,7 @@ export default {
     mounted() {
         this.init();
         this.animate();
+
     },
 };
 </script>
@@ -616,6 +650,24 @@ export default {
     justify-content: space-between;
 }
 
+.howto {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    top: 29px;
+    right: 120px;
+    font-size: 30px;
+}
+
+.home {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    top: 20px;
+    right: 20px;
+
+}
+
 .test {
     position: absolute;
     bottom: -50px;
@@ -656,17 +708,17 @@ export default {
 }
 
 .finDrop {
+    opacity: 1;
     transition-duration: 0.5s;
     position: absolute;
-    border: #45b6c3 2px solid;
-    border-radius: 25px;
     z-index: 999;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     display: inline-block;
-    background-color: #e1f6f5a9;
-    box-shadow: 0px 5px 4px 0px #408e9a;
-    border-radius: 20px;
+    background-image: url('../assets/drop.svg');
+    background-size: contain;
+    border-radius: 80px;
+    animation: pulse 1s infinite;
 }
 
 .finDrop.dorsal {
@@ -700,11 +752,11 @@ export default {
     z-index: 0;
 }
 
-.fin-pelvic,
+/* .fin-pelvic,
 .fin-anal,
 .fin-body {
     opacity: 0.5;
-}
+} */
 
 h3 {
     vertical-align: middle;
@@ -714,6 +766,55 @@ h3 {
 
 h3 img {
     margin-right: 0.5em;
+}
+
+.fail {
+    position: absolute;
+    top: 300px;
+    left: 300px;
+    width: 700px;
+    transform: translateY(0%);
+    opacity: 0;
+    animation: fail 3s linear;
+}
+
+@keyframes fail {
+    0% {
+        transform: translateY(55%);
+        opacity: 1;
+    }
+
+    30% {
+        transform: translateY(-40%);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(0.7);
+    }
+
+    to {
+        transform: scale(1);
+
+    }
+}
+
+.bubbles {
+    position: absolute;
+    top: 300px;
+    left: 50%;
+    right: 0;
+    transform: translateX(-50%);
+    width: 700px;
+    opacity: 0;
+    animation: fail 3s linear;
 }
 
 .fade-enter-active,
