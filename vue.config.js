@@ -1,7 +1,7 @@
 // vue.config.js
 
 module.exports = {
-   // publicPath: '/fish/',
+    publicPath: '/fish/',
     configureWebpack: {
 
         module: {

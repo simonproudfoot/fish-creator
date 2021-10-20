@@ -62,16 +62,16 @@ export default {
 
 <style scoped>
 .infowindow {
-    position: fixed;
+    position: absolute;
     top: 0;
     width: 1920px;
     height: 1080px;
-    background-color: #688790;
+    background-color: #688790d6;
     z-index: 9999;
 }
 
 .infowindow__content {
-    position: fixed;
+    position: absolute;
     background-color: #b4c7ca;
     top: 124px;
     left: 227px;
@@ -82,10 +82,10 @@ export default {
 .infowindow__content__box {
     text-align: left;
     border-radius: 0px 0px 20px 20px;
-    top: 124px;
+    top: 0;
     color: #fff;
-    position: fixed;
-    left: 293px;
+    position: absolute;
+    left: 100px;
     width: 410px;
     padding: 5em 2em;
     box-sizing: bounding-box;

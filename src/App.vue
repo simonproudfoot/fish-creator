@@ -1,34 +1,43 @@
 <template>
 <div id="app">
+    <fishtank :key="tankRefresh" />
     <creator v-if="$store.state.view == 'creator'" />
     <attractor v-if="$store.state.view == 'attractor'" />
-    <fishtank v-if="$store.state.view == 'fishtank'" />
+    <final v-if="$store.state.view == 'final'" />
 </div>
 </template>
-
 <script>
 import creator from "./components/creator.vue";
 import attractor from "./components/attractor.vue";
 import fishtank from "./components/fishTank.vue";
+import final from "./components/final.vue";
 export default {
+    data() {
+        return {
+            tankRefresh: 0
+        }
+    },
     name: "App",
     components: {
+        final,
         fishtank,
         creator,
         attractor,
     },
-    mounted() {
-        var saved = JSON.parse(localStorage.getItem('previous'))
-        if (saved) {
-
-            saved.forEach((fish, i) => {
-
-                if (i < 10) {
-                    console.log(i)
-                    this.$store.commit('ADD_FISH', fish)
-                }
-            });
+    watch: {
+        '$store.state.fishes'(val) {
+            this.tankRefresh++
         }
+    },
+    mounted() {
+        // var saved = JSON.parse(localStorage.getItem('previous'))
+        // if (saved) {
+        //     saved.forEach((fish, i) => {
+        //         if (i < 10) {
+        //             this.$store.commit('ADD_FISH', fish)
+        //         }
+        //     });
+        // }
     }
 };
 </script>
@@ -44,8 +53,11 @@ export default {
     src: local("Gilroy-Regular.woff"), url('./fonts/Gilroy-Regular.woff') format("woff");
 }
 
+.shadowed {}
+
 .button {
     padding: 0 1.1em;
+    filter: drop-shadow(7px 5px 0px rgba(0, 0, 0, 0.1));
     font-size: 40px;
     color: #fff;
     display: block;
@@ -58,16 +70,7 @@ export default {
 
 }
 
-.button::after {
-    content: '';
-    width: 50px;
-    background-color: red;
-    height: 300px;
-    top: 0;
-    left: 0;
-    display: inline;
 
-}
 
 .button.small {
     height: 57px;

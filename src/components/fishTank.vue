@@ -1,14 +1,13 @@
 <template>
 <div style="position: relative;">
-    <video v-if="playing" muted autoplay :src="require('@/assets/attractor.mp4')"></video>
-    <div v-else class="videoLoading">
-        <!-- <img :src="require('@/assets/loader.gif')" /> -->
+     <video muted autoplay loop :src="require('@/assets/attractor.mp4')"></video> 
+    <!-- <div v-else class="videoLoading">
+         <img :src="require('@/assets/loader.gif')" /> 
         <span>
             <h1>Loading...</h1>
         </span>
-    </div>
-    <div id="container">
-
+    </div> -->
+    <div id="containertank">
         <dat-gui v-if="gui && allFish[0]" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-number v-if="allFish[0]" v-model="allFish[0].scale.y" label="scale" />
             <dat-number v-if="allFish[0].movement.roll" v-model="allFish[0].movement.roll" label="Roll" />
@@ -24,15 +23,12 @@
                 <dat-number v-model="allFish[0].position.z" :min="0" :max="400" :step="1" label="Z" />
             </dat-folder>
             <dat-folder label="Camera" v-if="camera">
-                <!-- <dat-number v-model="camera.rotation.x" :min="-100" :max="100" :step="1" label="R X" /> -->
-                <!-- <dat-number v-model="camera.rotation.y" :min="13.43" :max="11.65" :step="0.01" label="R Y" /> -->
-                <!-- <dat-number v-model="camera.rotation.z" :min="-100" :max="100" :step="0.01" label="R Z" /> -->
                 <dat-number v-model="camera.position.x" :min="-100" :max="400" :step="0.01" label="LEFT RIGHT" />
                 <dat-number v-model="camera.position.y" :min="-25" :max="25" :step="0.01" label="P Y" />
                 <dat-number v-model="camera.position.z" :min="45" :max="684" :step="1" label="zoom in/out" />
             </dat-folder>
-            <dat-button @click="playing =!playing" label="Play/stop" />
-            <dat-button @click="$store.commit('SET_VIEW', 'creator')" label="BACK"></dat-button>
+            <!-- <dat-button @click="playing =!playing" label="Play/stop" />
+            <dat-button @click="$store.commit('SET_VIEW', 'creator')" label="BACK"></dat-button> -->
         </dat-gui>
     </div>
 </div>
@@ -171,8 +167,8 @@ export default {
                 if (this.allFish[fishIndex].getObjectByName(active)) {
                     this.allFish[fishIndex].getObjectByName(active).visible = true;
                 }
-                 if (this.allFish[fishIndex].getObjectByName(active+'_right')) {
-                    this.allFish[fishIndex].getObjectByName(active+'_right').visible = true;
+                if (this.allFish[fishIndex].getObjectByName(active + '_right')) {
+                    this.allFish[fishIndex].getObjectByName(active + '_right').visible = true;
                 }
             })
 
@@ -180,7 +176,8 @@ export default {
 
         animate,
         init() {
-            let container = document.getElementById("container");
+
+            let containertank = document.getElementById("containertank");
             // camera
             this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 1000); // last is depth
             this.camera.position.set(400, 0, 410); // 450
@@ -194,8 +191,6 @@ export default {
             light.color.setHex(0x00f5dc);
 
             this.scene.add(light);
-
-            //
 
             const dirLight = new Three.DirectionalLight(0xffffff, 0.7);
             dirLight.color.setHex(0xffffff);
@@ -246,22 +241,28 @@ export default {
                     // this.defaultPosition();
                 });
             })
-            // RENDER
 
-            this.renderer = new Three.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-            this.renderer.setSize(container.clientWidth, container.clientHeight);
-            this.renderer.outputEncoding = Three.sRGBEncoding;
-            this.renderer.setClearColor(0x000000, 0); // the default
-            container.appendChild(this.renderer.domElement);
-            setTimeout(() => {
-                this.changeSpeed(0);
-            }, 1000);
+            // RENDER
+            if (containertank) {
+                this.renderer = new Three.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+                this.renderer.setSize(containertank.clientWidth, containertank.clientHeight);
+                this.renderer.outputEncoding = Three.sRGBEncoding;
+                this.renderer.setClearColor(0x000000, 0); // the default
+                containertank.appendChild(this.renderer.domElement);
+                setTimeout(() => {
+                    this.changeSpeed(0);
+                }, 1000);
+            } else {
+                alert('NO CONTAINER')
+            }
+
         }
     },
     mounted() {
+        console.log(this.$store.state.fishes)
         this.init();
         this.animate();
-        console.log(this.movement)
+        // console.log(this.movement)
     },
 };
 </script>
@@ -300,7 +301,7 @@ footer {
     border: none !important;
 }
 
-#container {
+#containertank {
     position: relative;
     width: 1920px;
     height: 1080px;

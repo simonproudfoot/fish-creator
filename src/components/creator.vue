@@ -296,11 +296,12 @@ export default {
                 Object.assign(final, { movement: this.movement })
                 Object.assign(final, { score: this.score })
                 await this.$store.commit('ADD_FISH', final)
-                await this.$store.commit('SET_VIEW', 'fishtank')
+                await this.$store.commit('SET_VIEW', 'attractor')
                 if (this.$store.state.fishes.length > 4) {
                     this.$store.state.fishes.pop()
                 }
                 localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
+              this.$store.commit('SET_VIEW', 'final')
             }, 1500);
 
         },
@@ -828,5 +829,15 @@ h3 img {
 /* .fade-leave-active below version 2.1.8 */
     {
     opacity: 0;
+}
+
+.close {
+
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    top: 20px;
+    right: 20px;
+
 }
 </style>
