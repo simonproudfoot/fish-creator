@@ -1,6 +1,6 @@
 <template>
 <div class="" style="position: relative">
-    <div class="score" style="position: absolute; top: 0; left: 50px; z-index: 1; width: 300px;" >
+    <div class="score" style="position: absolute; top: 0; left: 50px; z-index: 1; width: 300px;">
         <h1>Score: {{score}}</h1>
         <p>How many fins are in the right place? Score more than 2 to keep afloat. <strong>Test use only</strong></p>
     </div>
@@ -327,7 +327,9 @@ export default {
         },
         // movement functions
         changeSpeed(s) {
-            this.mixer.timeScale = s;
+            if (this.mixer) {
+                this.mixer.timeScale = s;
+            }
         },
         convertDecimal(num, double) {
             let decimal = !double ? "0.0" + num : "0.00" + num;
@@ -354,7 +356,7 @@ export default {
                 if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
                     if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
-                        //   alert(name + '_right')
+
                         this.fishObject.getObjectByName(name + '_right').visible = false;
                     }
                 } else {
@@ -381,10 +383,16 @@ export default {
                     var right = "pos-" + element + "_fin-" + y + '_right';
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
+                        this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
+                    } else {
+                        console.log('missing: ' + name)
                     }
                     if (element == 'pectoral' || element == 'pelvic') {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
+                            this.fishObject.getObjectByName(name).material.side =  Three.DoubleSide
+                        } else {
+                            console.log('missing: ' + right)
                         }
                     }
                 });
