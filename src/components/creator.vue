@@ -1,33 +1,14 @@
 <template>
 <div class="" style="position: relative">
-
-    <!--<h1>{{score}}</h1> -->
+    <div class="score" style="position: absolute; top: 0; left: 50px; z-index: 1; width: 300px;" >
+        <h1>Score: {{score}}</h1>
+        <p>How many fins are in the right place? Score more than 2 to keep afloat. <strong>Test use only</strong></p>
+    </div>
     <div id="container" style="">
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
         <img v-if="!playing" class="close" :src="require('@/assets/home.svg')" @click="$store.commit('SET_VIEW', 'attractor')" />
         <div v-if="!playing" class="howto button small aqua" @click="$store.commit('SET_HOWTO', true)">Help {{draggingFin}}</div>
-        <dat-gui v-if="gui" closeText="Close controls" openText="Open controls" closePosition="bottom">
-            <dat-folder label="Fish position" v-if="fishObject">
-                <dat-string v-model="fishColor"></dat-string>
-                <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
-                <dat-number v-model="allFish[0].scale.y" :min="-100" :max="100" :step="0.01" label="Y" /> -->
-                <dat-number v-model="fishObject.position.x" :min="-70" :max="53" :step="1" label="X" />
-                <dat-number v-model="fishObject.position.y" :min="-10" :max="10" :step="1" label="Y" />
-                <dat-number v-model="fishObject.position.z" :min="0" :max="400" :step="1" label="Z" />
-                <dat-number v-model="fishObject.rotation.y" :min="-100" :max="100" :step="0.01" label="RotateY" />
-                <dat-number v-model="fishObject.rotation.x" :min="-100" :max="100" :step="0.01" label="RotateX" />
-                <dat-number v-model="fishObject.rotation.z" :min="-100" :max="100" :step="0.01" label="RotateZ" />
-            </dat-folder>
-            <dat-folder label="Camera" v-if="camera">
-                <dat-number v-model="camera.rotation.x" :min="-100" :max="100" :step="1" label="R X" />
-                <dat-number v-model="camera.rotation.y" :min="-100" :max="100" :step="0.01" label="R Y" />
-                <dat-number v-model="camera.rotation.z" :min="-100" :max="100" :step="0.01" label="R Z" />
-                <dat-number v-model="camera.position.x" :min="-100" :max="400" :step="0.01" label="LEFT RIGHT" />
-                <dat-number v-model="camera.position.y" :min="-25" :max="25" :step="0.01" label="P Y" />
-                <dat-number v-model="camera.position.z" :min="45" :max="684" :step="1" label="zoom in/out" />
-            </dat-folder>
-        </dat-gui>
         <template v-if="!playing && draggingFin">
             <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
         </template>
@@ -42,6 +23,7 @@
                         fin
                     </h3>
                 </div>
+
                 <div class="button green test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">Test!</div>
                 <!-- <img :src="require('@/assets/test.svg')" class="test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null" /> -->
                 <!-- <div class="fin__select test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">
@@ -50,7 +32,7 @@
             </footer>
             <footer class="footer--playing" v-else>
                 <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Try a different fin selection</div>
-                <div class="button green" v-if="score >3 && !saving" @click="save">Swim!</div>
+                <div class="button green" v-if="score >=2 && !saving" @click="save">Swim!</div>
             </footer>
         </transition>
     </div>
@@ -67,6 +49,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 export default {
     name: "ThreeTest",
     components: { fininfo, howto },
+
     data() {
         return {
             saving: false,
@@ -85,24 +68,10 @@ export default {
             //     updown: 2,
             // },
             fishColor: 'green',
-            fishScale: 1,
+
             draggingFin: "",
             playing: false,
-            startRotation: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            startPosition: {
-                x: 5,
-                y: 6.75,
-                z: 0,
-            },
-            position: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
+
             camera: null,
             visible: false,
             hidePlay: false,
@@ -112,7 +81,7 @@ export default {
             ready: false,
             fishObject: "",
             scene: "",
-            fishObjectUlr: require("@/assets/fish-final.gltf"),
+            fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
             backFin: "",
             sideFin: "",
@@ -216,17 +185,25 @@ export default {
         },
         playing(x) {
             if (x) {
-                this.changeSpeed(1)
-                if (this.score <= 3) {
+                //playSound('fss')
+                if (this.score > 2) {
+                    this.$store.state.sounds.test.loop = true
+                    this.$store.state.sounds.test.play()
+                    this.changeSpeed(1)
+                } else {
+                    this.$store.state.sounds.fail.loop = false
+                    this.$store.state.sounds.fail.play()
+
                     setTimeout(() => {
                         this.fail = true
                     }, 1000);
-
                 }
+
             } else {
                 //  alert
                 this.defaultPosition()
                 this.changeSpeed(0),
+
                     setTimeout(() => {
                         this.movement.roll = 8
                         this.movement.updown = 8
@@ -234,9 +211,7 @@ export default {
                     }, 500);
             }
         },
-        fishScale(x) {
-            this.fishObject.scale.set(x, x, x);
-        },
+
         // ROLL FINS 
         'fins.dorsal.selected'(val) {
             if (val == 'dorsal') {
@@ -301,7 +276,7 @@ export default {
                     this.$store.state.fishes.pop()
                 }
                 localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
-              this.$store.commit('SET_VIEW', 'final')
+                this.$store.commit('SET_VIEW', 'final')
             }, 1500);
 
         },
@@ -366,14 +341,9 @@ export default {
                 (this.fishObject[rotationPosition].val = this.startPosition[val]);
         },
         defaultPosition() {
-            //gsap.killTweensOf(this.fishObject.position, "x,y,z");
-            // gsap.killTweensOf(this.fishObject.rotation, "x,y,z");
-            this.fishObject.rotation.y = this.startRotation.y;
-            this.fishObject.rotation.x = this.startRotation.x;
-            this.fishObject.rotation.z = this.startRotation.z;
-            this.fishObject.position.y = this.startPosition.y;
-            this.fishObject.position.x = this.startPosition.x;
-            this.fishObject.position.z = this.startPosition.z;
+            this.fishObject.scale ? this.fishObject.scale.set(0.030, 0.030, 0.030) : null
+            this.fishObject.position ? this.fishObject.position.set(-0.860, 2.280, 0.030) : null
+            this.fishObject.rotation ? this.fishObject.rotation.set(0, 0, 0) : null
         },
         showFin(position) {
             this.fins[position.split('-').pop()].selected = this.draggingFin
@@ -384,8 +354,8 @@ export default {
                 if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
                     if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
-                     //   alert(name + '_right')
-                     this.fishObject.getObjectByName(name + '_right').visible = false;
+                        //   alert(name + '_right')
+                        this.fishObject.getObjectByName(name + '_right').visible = false;
                     }
                 } else {
                     this.fishObject.getObjectByName(active).visible = true;
@@ -431,9 +401,7 @@ export default {
             // this.fishObject.rotation.y += 0.009
             if (this.playing) {
                 if (this.fishObject.position.y > -18.5) {
-                    if (this.score <= 3 && this.score >= 2) {
-                        this.fishObject.position.y -= 0.025
-                    } else if (this.score <= 2) {
+                    if (this.score <= 2) {
                         this.fishObject.position.y -= 0.07
                     } else {
                         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown * 2
@@ -451,12 +419,13 @@ export default {
                         this.fishObject.rotation.x += 0.009
                     }
                     // UP DOWN
-                    if (this.score > 3) {
+                    if (this.score > 2) {
 
                         this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * 2 + 2
                     }
                     // SINKING
                 } else {
+
                     //    // alert(this.fishObject.rotation.y)
                     //     if (this.fishObject.rotation.y > 1.56 && this.rotationDirection.y == '+') {
                     //         this.fishObject.rotation.y += 0.01
@@ -475,7 +444,11 @@ export default {
             } else {
                 this.playing = false
                 this.fail = false
-                // this.defaultPosition()
+                this.defaultPosition()
+                this.$store.state.sounds.test.pause()
+                this.$store.state.sounds.test.currentTime = 0;
+                this.$store.state.sounds.fail.pause()
+                this.$store.state.sounds.fail.currentTime = 0;
             }
             this.renderer.render(this.scene, this.camera);
         },
@@ -509,7 +482,6 @@ export default {
             dirLight.shadow.camera.far = 3500;
             dirLight.shadow.bias = -0.0001;
             const dirLightHelper = new Three.DirectionalLightHelper(dirLight, 10);
-            //  this.scene.add(dirLightHelper);
             const loader = new Three.TextureLoader();
             loader.load(this.backgroundImage, (texture) => {
                 this.scene.background = texture;
@@ -518,6 +490,7 @@ export default {
             const gltfLoader = new GLTFLoader();
             gltfLoader.load(this.fishObjectUlr, (gltf) => {
                 this.mixer = new Three.AnimationMixer(gltf.scene);
+
                 // clones element to other side - need to find out how to duplicatge mixer
                 // var newFin = gltf.scene.getObjectByName('pos-pectoral_fin-tail').clone()
                 // newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
@@ -532,18 +505,18 @@ export default {
                 // this.mixer.timeScale = 0;
                 this.fishObject = gltf.scene;
                 this.fishObject.castShadow = true;
-                this.fishScale = 0.05;
+
                 // this.fishObject.rotation.y = 11
                 this.scene.add(this.fishObject);
                 this.defaultPosition();
                 this.hideAllFins();
-                //   this.fishObject.getObjectByName("body").visible = false;
+                // this.fishObject.getObjectByName("body").visible = false;
                 // this.fishObject.getObjectByName("Body_SDS_1_2").'material'.flatShading = true
                 var arr = ['0x3a911a', '0xad821c', '0x154d59']
                 this.fishColor = arr[Math.floor(Math.random() * arr.length)];
-                //   this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
+                // this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
                 // this.fishObject.getObjectByName("Markings_Left").visible = false
-                //this.fishObject.getObjectByName("Markings_Right").visible = false
+                // this.fishObject.getObjectByName("Markings_Right").visible = false
             });
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });

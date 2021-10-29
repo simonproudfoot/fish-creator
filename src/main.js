@@ -10,9 +10,19 @@ const store = new Vuex.Store({
     view: 'attractor', // attractor, creator, fishtank
     finInfo: '',
     fishes: [],
-    howto: false
+    howto: false,
+    reset: 0,
+    sounds: {
+      swim: new Audio(require("@/assets/sound/swim.wav")),
+      test: new Audio(require("@/assets/sound/test.mp3")),
+      fail: new Audio(require("@/assets/sound/fail.wav"))
+
+    },
   },
   mutations: {
+    RESET_SCREEN(state) {
+      state.reset++
+    },
     ADD_FISH(state, val) {
       state.fishes.push(val)
     },
@@ -28,7 +38,20 @@ const store = new Vuex.Store({
   }
 })
 
+var globals = {
+  created: function () {
+    console.log('mixin hook called')
+  },
+
+  methods: {
+    playSound: function () {
+      alert('playing sound')
+    }
+  }
+}
+
 new Vue({
   store,
+  mixins: [globals],
   render: h => h(App),
 }).$mount('#app')

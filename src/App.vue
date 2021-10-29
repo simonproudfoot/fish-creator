@@ -1,15 +1,15 @@
 <template>
 <div id="app">
-    <fishtank :key="tankRefresh" />
+    <!-- <fishtank :key="tankRefresh" /> -->
     <creator v-if="$store.state.view == 'creator'" />
     <attractor v-if="$store.state.view == 'attractor'" />
-    <final v-if="$store.state.view == 'final'" />
+    <final v-if="$store.state.view == 'final'" /> 
 </div>
 </template>
 <script>
 import creator from "./components/creator.vue";
 import attractor from "./components/attractor.vue";
-import fishtank from "./components/fishTank.vue";
+//import fishtank from "./components/fishTank.vue";
 import final from "./components/final.vue";
 export default {
     data() {
@@ -20,24 +20,27 @@ export default {
     name: "App",
     components: {
         final,
-        fishtank,
+        //fishtank,
         creator,
         attractor,
     },
     watch: {
         '$store.state.fishes'(val) {
             this.tankRefresh++
+        },
+        '$store.state.reset'(val) {
+            this.tankRefresh++
         }
     },
     mounted() {
-        // var saved = JSON.parse(localStorage.getItem('previous'))
-        // if (saved) {
-        //     saved.forEach((fish, i) => {
-        //         if (i < 10) {
-        //             this.$store.commit('ADD_FISH', fish)
-        //         }
-        //     });
-        // }
+        var saved = JSON.parse(localStorage.getItem('previous'))
+        if (saved) {
+            saved.forEach((fish, i) => {
+                if (i < 10) {
+                    this.$store.commit('ADD_FISH', fish)
+                }
+            });
+        }
     }
 };
 </script>
@@ -69,8 +72,6 @@ export default {
     position: relative;
 
 }
-
-
 
 .button.small {
     height: 57px;

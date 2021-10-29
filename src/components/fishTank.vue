@@ -1,6 +1,6 @@
 <template>
 <div style="position: relative;">
-     <video muted autoplay loop :src="require('@/assets/attractor.mp4')"></video> 
+    <video muted autoplay loop :src="require('@/assets/slave.mp4')"></video>
     <!-- <div v-else class="videoLoading">
          <img :src="require('@/assets/loader.gif')" /> 
         <span>
@@ -8,17 +8,15 @@
         </span>
     </div> -->
     <div id="containertank">
+        <!--
         <dat-gui v-if="gui && allFish[0]" closeText="Close controls" openText="Open controls" closePosition="bottom">
             <dat-number v-if="allFish[0]" v-model="allFish[0].scale.y" label="scale" />
             <dat-number v-if="allFish[0].movement.roll" v-model="allFish[0].movement.roll" label="Roll" />
             <dat-number v-if="allFish[0].movement.smimWind" v-model="allFish[0].movement.smimWind" label="smimWind" />
-            <dat-number v-if="allFish[0].movement.updown" v-model="allFish[0].movement.updown" label="Updown" />
-            <dat-string v-else v-model="allFish[0].movement.updown" label="upDown" />
-
-            <dat-folder label="fish main" v-if="allFish[0]">
-                <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
+            <dat-folder label="fish main" v-if="allFish[0]"> -->
+        <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
                 <dat-number v-model="allFish[0].scale.y" :min="-100" :max="100" :step="0.01" label="Y" /> -->
-                <dat-number v-model="allFish[0].position.x" :min="-100" :max="100" :step="1" label="X" />
+        <!-- <dat-number v-model="allFish[0].position.x" :min="-100" :max="100" :step="1" label="X" />
                 <dat-number v-model="allFish[0].position.y" :min="-10" :max="10" :step="1" label="Y" />
                 <dat-number v-model="allFish[0].position.z" :min="0" :max="400" :step="1" label="Z" />
             </dat-folder>
@@ -26,10 +24,10 @@
                 <dat-number v-model="camera.position.x" :min="-100" :max="400" :step="0.01" label="LEFT RIGHT" />
                 <dat-number v-model="camera.position.y" :min="-25" :max="25" :step="0.01" label="P Y" />
                 <dat-number v-model="camera.position.z" :min="45" :max="684" :step="1" label="zoom in/out" />
-            </dat-folder>
-            <!-- <dat-button @click="playing =!playing" label="Play/stop" />
-            <dat-button @click="$store.commit('SET_VIEW', 'creator')" label="BACK"></dat-button> -->
-        </dat-gui>
+            </dat-folder> -->
+        <!-- <dat-button @click="playing =!playing" label="Play/stop" />
+            <dat-button @click="$store.commit('SET_VIEW', 'creator')" label="BACK"></dat-button> 
+        </dat-gui> -->
     </div>
 </div>
 </template>
@@ -72,7 +70,7 @@ export default {
             ready: false,
             fishObject: "",
             scene: "",
-            fishObjectUlr: require("@/assets/fish-main.gltf"),
+            fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/underwater.jpg"),
             backFin: "",
             sideFin: "",
@@ -214,29 +212,22 @@ export default {
                     // });
                     //   this.mixer.timeScale = 1;
                     gltf.castShadow = true;
-                    //this.hideAllFins();
                     this.allFish.push(gltf.scene);
-
                     Object.assign(this.allFish[i], { movement: fish.movement });
                     Object.assign(this.allFish[i], { score: fish.score });
                     this.allFish[i].scale.set(0.006, 0.006, 0.006)
-
                     this.scene.add(this.allFish[i]);
-
                     if (i != 0) {
-                        // this.allFish[i].castShadow = true
-
-                        this.allFish[i].position.x = Math.random() * (100 - -100) + -100;
-                        this.allFish[i].position.y = Math.random() * (10 - -10) + -10;
+                        this.allFish[i].castShadow = false
+                        console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
+                        //  this.allFish[i].position.x = 400
+                        this.allFish[i].position.y = Math.random() * (7 - -7) + -7;
                         this.allFish[i].position.z = Math.random() * (340 - 240) + 240;
-
                     } else {
                         this.allFish[i].position.z = 350
                         this.allFish[i].position.x = 400
                     }
-
                     this.hideShowAllFins(i, fish)
-
                     this.playing = true
                     // this.defaultPosition();
                 });
@@ -252,16 +243,17 @@ export default {
                 setTimeout(() => {
                     this.changeSpeed(0);
                 }, 1000);
-            } else {
-                alert('NO CONTAINER')
             }
-
         }
     },
     mounted() {
-        console.log(this.$store.state.fishes)
+        // this.$store.state.sounds.test.loop = false
+        // this.$store.state.sounds.test.stop()
+        // this.$store.state.sounds.fail.play()
+         // this.$store.state.sounds.swim.play()
         this.init();
         this.animate();
+      
         // console.log(this.movement)
     },
 };

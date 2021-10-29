@@ -96,7 +96,7 @@ export default {
     top: 0;
     width: 1920px;
     height: 1080px;
-    background-color: #b4c7ca;
+    background-color: #688790d6;
     z-index: 9999;
 }
 
