@@ -18,16 +18,8 @@ pnpm-debug.log*
 .vscode
 *.suo
 *.ntvs*
-*.glb
-*.gltf
 *.njsproj
 *.sln
 *.sw?
 
 
-glb
-gltf
-.glb
-.gltf
-*.glb
-*.gltf
