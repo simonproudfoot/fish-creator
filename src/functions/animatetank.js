@@ -2,7 +2,7 @@ function animate() {
     let speed = 1
     let move = true
     requestAnimationFrame(this.animate);
-   
+
     var delta = this.clock.getDelta();
     if (this.mixer && this.allFish[0]) {
         this.mixer.update(delta);
@@ -15,12 +15,10 @@ function animate() {
                 this.camera.position.x = 0
             }
             this.allFish.forEach((selectedFish, i) => {
-                
-                if (selectedFish.score <= 3) {
-                    selectedFish.position.y -= 0.025
-                } else {
-                    selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.updown / 8
-                }
+
+
+                selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.updown / 8
+
                 // WINDING
                 if (selectedFish.movement.smimWind <= 7) {
                     selectedFish.rotation.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.smimWind / 9

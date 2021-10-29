@@ -1,6 +1,6 @@
 <template>
 <div class="" style="position: relative">
-    <div class="score" style="position: absolute; top: 0; left: 50px; z-index: 1; width: 300px;">
+    <div class="score" style="position: absolute; top: 0; right: -300px; z-index: 1; width: 300px;">
         <h1>Score: {{score}}</h1>
         <p>How many fins are in the right place? Score more than 2 to keep afloat. <strong>Test use only</strong></p>
     </div>
@@ -61,14 +61,7 @@ export default {
                 y: '',
                 z: '',
             },
-            // movement: {
-            //     // max 8, null keeps going and 0 is still
-            //     smimWind: 2,
-            //     roll: 2,
-            //     updown: 2,
-            // },
             fishColor: 'green',
-
             draggingFin: "",
             playing: false,
 
@@ -276,6 +269,7 @@ export default {
                     this.$store.state.fishes.pop()
                 }
                 localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
+                this.playing = false
                 this.$store.commit('SET_VIEW', 'final')
             }, 1500);
 
@@ -390,7 +384,7 @@ export default {
                     if (element == 'pectoral' || element == 'pelvic') {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
-                            this.fishObject.getObjectByName(name).material.side =  Three.DoubleSide
+                            this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
                         } else {
                             console.log('missing: ' + right)
                         }
@@ -562,6 +556,7 @@ export default {
     width: 1920px;
     height: 1080px;
     color: #06909c;
+    overflow: hidden;
 }
 
 .controls {
@@ -791,8 +786,10 @@ h3 img {
 .bubbles {
     position: absolute;
     top: 300px;
-    left: 50%;
+
     right: 0;
+    margin: auto;
+    left: 0;
     transform: translateX(-50%);
     width: 700px;
     opacity: 0;

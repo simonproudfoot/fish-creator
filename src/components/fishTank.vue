@@ -1,33 +1,8 @@
 <template>
 <div style="position: relative;">
     <video muted autoplay loop :src="require('@/assets/slave.mp4')"></video>
-    <!-- <div v-else class="videoLoading">
-         <img :src="require('@/assets/loader.gif')" /> 
-        <span>
-            <h1>Loading...</h1>
-        </span>
-    </div> -->
     <div id="containertank">
-        <!--
-        <dat-gui v-if="gui && allFish[0]" closeText="Close controls" openText="Open controls" closePosition="bottom">
-            <dat-number v-if="allFish[0]" v-model="allFish[0].scale.y" label="scale" />
-            <dat-number v-if="allFish[0].movement.roll" v-model="allFish[0].movement.roll" label="Roll" />
-            <dat-number v-if="allFish[0].movement.smimWind" v-model="allFish[0].movement.smimWind" label="smimWind" />
-            <dat-folder label="fish main" v-if="allFish[0]"> -->
-        <!-- <dat-number v-model="allFish[0].scale.x" :min="-100" :max="100" :step="0.01" label="X" />
-                <dat-number v-model="allFish[0].scale.y" :min="-100" :max="100" :step="0.01" label="Y" /> -->
-        <!-- <dat-number v-model="allFish[0].position.x" :min="-100" :max="100" :step="1" label="X" />
-                <dat-number v-model="allFish[0].position.y" :min="-10" :max="10" :step="1" label="Y" />
-                <dat-number v-model="allFish[0].position.z" :min="0" :max="400" :step="1" label="Z" />
-            </dat-folder>
-            <dat-folder label="Camera" v-if="camera">
-                <dat-number v-model="camera.position.x" :min="-100" :max="400" :step="0.01" label="LEFT RIGHT" />
-                <dat-number v-model="camera.position.y" :min="-25" :max="25" :step="0.01" label="P Y" />
-                <dat-number v-model="camera.position.z" :min="45" :max="684" :step="1" label="zoom in/out" />
-            </dat-folder> -->
-        <!-- <dat-button @click="playing =!playing" label="Play/stop" />
-            <dat-button @click="$store.commit('SET_VIEW', 'creator')" label="BACK"></dat-button> 
-        </dat-gui> -->
+
     </div>
 </div>
 </template>
@@ -63,7 +38,6 @@ export default {
             background: null,
             visible: false,
             hidePlay: false,
-            // imageTwo: require("@/assets/fish-guide2.jpg"),
             clock: new Three.Clock(),
             mixer: null,
             showFish: "fishObject",
@@ -152,11 +126,11 @@ export default {
                     var name = "pos-" + element + "_fin-" + y;
                     if (this.allFish[fishIndex].getObjectByName(name)) {
                         this.allFish[fishIndex].getObjectByName(name).visible = false;
-
+                        this.allFish[fishIndex].getObjectByName(name).material.side = Three.DoubleSide
                     }
                     if (this.allFish[fishIndex].getObjectByName(name + '_right')) {
                         this.allFish[fishIndex].getObjectByName(name + '_right').visible = false;
-
+                        this.allFish[fishIndex].getObjectByName(name + '_right').material.side = Three.DoubleSide
                     }
                 });
             });
@@ -169,12 +143,9 @@ export default {
                     this.allFish[fishIndex].getObjectByName(active + '_right').visible = true;
                 }
             })
-
         },
-
         animate,
         init() {
-
             let containertank = document.getElementById("containertank");
             // camera
             this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 1000); // last is depth
@@ -182,26 +153,21 @@ export default {
             this.scene = new Three.Scene();
             // background
             this.scene.background = null
-
             // LIGHT
             const light = new Three.HemisphereLight(0x36d7ff, 0x09ba00, 1);
             light.groundColor.setHex(0x3eba00);
             light.color.setHex(0x00f5dc);
-
             this.scene.add(light);
-
             const dirLight = new Three.DirectionalLight(0xffffff, 0.7);
             dirLight.color.setHex(0xffffff);
             dirLight.position.set(-1, 1.75, 70);
             dirLight.position.multiplyScalar(30);
             this.scene.add(dirLight);
-
             // fog 
             const near = 20;
             const far = 200;
             const color = '#2a8f99';
             this.scene.fog = new Three.Fog(color, near, far);
-
             // Load object
             const gltfLoader = new GLTFLoader();
             this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
@@ -218,7 +184,7 @@ export default {
                     this.allFish[i].scale.set(0.006, 0.006, 0.006)
                     this.scene.add(this.allFish[i]);
                     if (i != 0) {
-                        this.allFish[i].castShadow = false
+
                         console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
                         //  this.allFish[i].position.x = 400
                         this.allFish[i].position.y = Math.random() * (7 - -7) + -7;
@@ -229,10 +195,9 @@ export default {
                     }
                     this.hideShowAllFins(i, fish)
                     this.playing = true
-                    // this.defaultPosition();
+
                 });
             })
-
             // RENDER
             if (containertank) {
                 this.renderer = new Three.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
@@ -250,10 +215,9 @@ export default {
         // this.$store.state.sounds.test.loop = false
         // this.$store.state.sounds.test.stop()
         // this.$store.state.sounds.fail.play()
-         // this.$store.state.sounds.swim.play()
+        // this.$store.state.sounds.swim.play()
         this.init();
         this.animate();
-      
         // console.log(this.movement)
     },
 };
@@ -277,7 +241,6 @@ video,
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-
 }
 
 footer {
@@ -297,7 +260,6 @@ footer {
     position: relative;
     width: 1920px;
     height: 1080px;
-
 }
 
 .controls {

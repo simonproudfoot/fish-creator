@@ -1,6 +1,6 @@
 <template>
 <div id="app">
-    <!-- <fishtank :key="tankRefresh" /> -->
+    <fishtank :key="tankRefresh" /> 
     <creator v-if="$store.state.view == 'creator'" />
     <attractor v-if="$store.state.view == 'attractor'" />
     <final v-if="$store.state.view == 'final'" /> 
@@ -9,7 +9,7 @@
 <script>
 import creator from "./components/creator.vue";
 import attractor from "./components/attractor.vue";
-//import fishtank from "./components/fishTank.vue";
+import fishtank from "./components/fishTank.vue";
 import final from "./components/final.vue";
 export default {
     data() {
@@ -20,7 +20,7 @@ export default {
     name: "App",
     components: {
         final,
-        //fishtank,
+        fishtank,
         creator,
         attractor,
     },
@@ -36,7 +36,7 @@ export default {
         var saved = JSON.parse(localStorage.getItem('previous'))
         if (saved) {
             saved.forEach((fish, i) => {
-                if (i < 10) {
+                if (i < 5) {
                     this.$store.commit('ADD_FISH', fish)
                 }
             });
