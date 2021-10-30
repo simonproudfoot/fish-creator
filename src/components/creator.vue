@@ -25,10 +25,7 @@
                 </div>
 
                 <div class="button green test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">Test!</div>
-                <!-- <img :src="require('@/assets/test.svg')" class="test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null" /> -->
-                <!-- <div class="fin__select test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">
-                    {{ playing ? "STOP" : "TEST" }}
-                 </div> -->
+
             </footer>
             <footer class="footer--playing" v-else>
                 <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Try a different fin selection</div>
@@ -43,6 +40,19 @@
 
 <script>
 import * as Three from "three";
+import {
+    ModifierStack,
+    Bend,
+    Twist,
+    Noise,
+    Cloth,
+    UserDefined,
+    Taper,
+    Break,
+    Bloat,
+    Vector3,
+    ModConstant
+} from "three.modifiers";
 import fininfo from './fininfo.vue'
 import howto from './howto.vue'
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -52,6 +62,9 @@ export default {
 
     data() {
         return {
+            modifier: '',
+            bendSize: 0.4,
+            bend: new Bend(0.1, 0.7, 0),
             saving: false,
             fail: false,
             finInfo: '',
@@ -400,8 +413,21 @@ export default {
             if (this.mixer && this.fishObject) {
                 this.mixer.update(delta);
             }
-            // this.fishObject.rotation.y += 0.009
+          
+            // WRITE A FUNCTION TO ANIMATE EACH OF THE FIN PARTS
+            this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
+            this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime()* 3)  * 0.600 * -0.750
+
+            //this.fishObject.getObjectByName('fish').rotation.x = Math.sin(this.clock.getElapsedTime() * 5) * -0.3 * 0.3
+
+      
+
+// start 0.430
+// end -0.470
+            this.modifier && this.modifier.apply();
+
             if (this.playing) {
+
                 if (this.fishObject.position.y > -18.5) {
                     if (this.score <= 2) {
                         this.fishObject.position.y -= 0.07
@@ -446,7 +472,7 @@ export default {
             } else {
                 this.playing = false
                 this.fail = false
-                this.defaultPosition()
+                // this.defaultPosition()
                 this.$store.state.sounds.test.pause()
                 this.$store.state.sounds.test.currentTime = 0;
                 this.$store.state.sounds.fail.pause()
@@ -493,33 +519,28 @@ export default {
             gltfLoader.load(this.fishObjectUlr, (gltf) => {
                 this.mixer = new Three.AnimationMixer(gltf.scene);
 
-                // clones element to other side - need to find out how to duplicatge mixer
-                // var newFin = gltf.scene.getObjectByName('pos-pectoral_fin-tail').clone()
-                // newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
-                // newFin.name = 'pos-pectoral_fin-tail'
-                // gltf.scene.add(newFin)
-                // console.log(newFin)
-                // // real id 25
-                //console.log( gltf.animations)//.getObjectByName('pos-pectoral_fin-tailAction'))
-                // gltf.animations.forEach((clip) => {
-                //     this.mixer.clipAction(clip).play();
-                // });
-                // this.mixer.timeScale = 0;
                 this.fishObject = gltf.scene;
                 this.fishObject.castShadow = true;
-
-                // this.fishObject.rotation.y = 11
+                this.fishObject.rotation.set(1.600, 0, 0)
                 this.scene.add(this.fishObject);
                 this.defaultPosition();
                 this.hideAllFins();
-                // this.fishObject.getObjectByName("body").visible = false;
-                // this.fishObject.getObjectByName("Body_SDS_1_2").'material'.flatShading = true
+
                 var arr = ['0x3a911a', '0xad821c', '0x154d59']
                 this.fishColor = arr[Math.floor(Math.random() * arr.length)];
-                // this.fishObject.getObjectByName("Body_SDS_1_2").material.color.setHex(this.fishColor);
-                // this.fishObject.getObjectByName("Markings_Left").visible = false
-                // this.fishObject.getObjectByName("Markings_Right").visible = false
+                this.modifier = new ModifierStack(this.fishObject.getObjectByName("fish"), this.fishObject.getObjectByName("eyes"));
+                this.modifier.addModifier(this.bend);
+
+
+                //this.fishObject.getObjectByName('back-fins').position.set(1,1,1)
+
             });
+
+            // this.modifier = new ModifierStack(this.fishObject.getObjectByName("fish"));
+
+            // // const bend = new Bend(0.1, 0.5, 0);
+            // this.bend.constraint = ModConstant.LEFT;
+
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
