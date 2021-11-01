@@ -354,15 +354,8 @@ export default {
             this.fishObject.position ? this.fishObject.position.set(-0.860, 2.280, 0.030) : null
             this.fishObject.rotation ? this.fishObject.rotation.set(0, 0, 0) : null
 
-         // this.scene.rotation.x = 1.580
+            //this.scene.rotation.x = 2.540
 
-            this.scene.getObjectByName('eyes').position.set(-4.860,-0.060,1.600)
-             this.scene.getObjectByName('eyes').rotation.set(-0.070,-0.220, 0)
-            this.scene.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
-
-          
-
-             
             // eyes 
 
             //front 71.260
@@ -441,8 +434,6 @@ export default {
 
             //front 71.260
             // back 30.640
-
-           
 
             // start 0.430
             // end -0.470
@@ -535,7 +526,6 @@ export default {
             // Load object
             const gltfLoader = new GLTFLoader();
             gltfLoader.load(this.fishObjectUlr, (gltf) => {
-                this.mixer = new Three.AnimationMixer(gltf.scene);
 
                 this.fishObject = gltf.scene;
                 this.fishObject.castShadow = true;
@@ -550,22 +540,24 @@ export default {
                 this.modifier.addModifier(this.bend);
 
                 const geometry = new Three.BoxGeometry(15, 10, 0.420);
-                const material = new Three.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-                const cube = new Three.Mesh(geometry, material);
-                cube.position.set(-10.130, 7.090, 0.660)
-                cube.scale.set(0.820, 0.640, 0.580)
+                const material = new Three.MeshBasicMaterial({ color: 0x00ff00 });
+                const cube = new Three.Mesh(geometry);
+                cube.material.opacity = 0;
+                cube.material.transparent = true;
+                cube.position.set(-360.000, 150.000, 16.660)
+                cube.rotation.set(0, 0.045, 0)
+                cube.scale.set(20.000, 20.000, 21.470)
                 cube.name = 'eyeWrapper'
-            
+
+                this.fishObject.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
+                this.fishObject.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
+                this.fishObject.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
 
                 cube.add(this.fishObject.getObjectByName('eyes'))
 
-                this.scene.add(cube);
+                this.fishObject.add(cube);
 
             });
-
-            // this.modifier = new ModifierStack(this.fishObject.getObjectByName("fish"));
-            // // const bend = new Bend(0.1, 0.5, 0);
-            // this.bend.constraint = ModConstant.LEFT;
 
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
