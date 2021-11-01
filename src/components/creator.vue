@@ -62,6 +62,7 @@ export default {
 
     data() {
         return {
+            sideFin: '',
             modifier: '',
             bendSize: 0.4,
             bend: new Bend(0.1, 0.7, 0),
@@ -90,7 +91,7 @@ export default {
             fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
             backFin: "",
-            sideFin: "",
+
             topFin: "",
             swimSpeed: 3,
             sinking: false,
@@ -375,10 +376,13 @@ export default {
                     }
                 } else {
                     this.fishObject.getObjectByName(active).visible = true;
+                    this.sideFin = active
+
                     // show other side
                     if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
                         if (right != undefined) {
                             this.fishObject.getObjectByName(right).visible = true;
+
                         }
                     }
                 }
@@ -417,29 +421,27 @@ export default {
             let move = true
             requestAnimationFrame(this.animate);
             var delta = this.clock.getDelta();
-            if (this.mixer && this.fishObject) {
-                this.mixer.update(delta);
-            }
+            
 
-            // WRITE A FUNCTION TO ANIMATE EACH OF THE FIN PARTS
-            this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
-            this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
+     
+          
 
-            if (this.scene.getObjectByName('eyeWrapper')) {
-                this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
-            }
-            //this.fishObject.getObjectByName('eyes').position.z = Math.sin(this.clock.getElapsedTime() * 3 ) * Math.PI * 9 * 3;
-
-            //  this.fishObject.getObjectByName('eyes').position.z = Math.sin(this.clock.getElapsedTime() * 3) * 71.260 * 30.640
-
-            //front 71.260
-            // back 30.640
-
-            // start 0.430
-            // end -0.470
+           
             this.modifier && this.modifier.apply();
 
             if (this.playing) {
+
+                  this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
+            this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
+            // side fin
+            if (this.fishObject.getObjectByName(this.sideFin + '_right')) {
+                this.fishObject.getObjectByName(this.sideFin).rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
+                this.fishObject.getObjectByName(this.sideFin + '_right').rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
+            }
+    
+            if (this.scene.getObjectByName('eyeWrapper')) {
+                this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
+            }
 
                 if (this.fishObject.position.y > -18.5) {
                     if (this.score <= 2) {
