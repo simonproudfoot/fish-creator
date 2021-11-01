@@ -10,11 +10,19 @@
 <script>
 import * as Three from "three";
 import animate from '../functions/animatetank.js'
+import {
+    ModifierStack,
+    Bend,
+
+} from "three.modifiers";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 export default {
     name: "ThreeTest",
     data() {
         return {
+            modifier: [],
+            bendSize: 0.4,
+            bend: new Bend(0.1, 0.7, 0),
             allFish: [],
             gui: false,
             fishScale: 0.3,
@@ -165,39 +173,62 @@ export default {
             this.scene.add(dirLight);
             // fog 
             const near = 20;
-            const far = 200;
+            const far = 800;
             const color = '#2a8f99';
             this.scene.fog = new Three.Fog(color, near, far);
-            // Load object
+
             const gltfLoader = new GLTFLoader();
             this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
                 gltfLoader.load(this.fishObjectUlr, (gltf) => {
-                    this.mixer = new Three.AnimationMixer(gltf.scene);
-                    // gltf.animations.forEach((clip) => {
-                    //     this.mixer.clipAction(clip).play();
-                    // });
-                    //   this.mixer.timeScale = 1;
-                    gltf.castShadow = true;
-                    this.allFish.push(gltf.scene);
-                    Object.assign(this.allFish[i], { movement: fish.movement });
-                    Object.assign(this.allFish[i], { score: fish.score });
-                    this.allFish[i].scale.set(0.006, 0.006, 0.006)
-                    this.scene.add(this.allFish[i]);
-                    if (i != 0) {
 
-                        console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
-                        //  this.allFish[i].position.x = 400
-                        this.allFish[i].position.y = Math.random() * (7 - -7) + -7;
-                        this.allFish[i].position.z = Math.random() * (340 - 240) + 240;
-                    } else {
-                        this.allFish[i].position.z = 350
-                        this.allFish[i].position.x = 400
+                    this.allFish.push(gltf.scene);
+                    var fishObject = this.allFish[i];
+                    if (i == 0) {
+                        const geometry = new Three.BoxGeometry(15, 10, 0.420);
+                        const cube = new Three.Mesh(geometry);
+                        cube.material.opacity = 1;
+                        cube.material.transparent = false;
+                        cube.position.set(-360.000, 150.000, 16.660)
+                        cube.rotation.set(0, 0.045, 0)
+                        cube.scale.set(20.000, 20.000, 21.470)
+                        cube.add(fishObject.getObjectByName('eyes'))
+                        cube.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
+                        cube.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
+                        cube.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
+                        cube.name = 'eyeWrapper'
+                        cube.material.opacity = 0;
+                        cube.material.transparent = true;
+                        fishObject.add(cube);
+                        this.allFish[i].add(cube);
                     }
+
+                    this.scene.add(fishObject)
+
+                    if (i != 0) {
+                        this.allFish[i].scale.set(0.020, 0.020, 0.020)
+                        this.allFish[i].position.x = 400
+                      console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
+                        this.allFish[i].position.y = Math.random() * (50 - -50) + -50;
+                        this.allFish[i].position.z = Math.random() * (80 - -200) + -200;
+                    } else {
+                        this.allFish[i].scale.set(0.030, 0.030, 0.030)
+                        this.modifier = new ModifierStack(this.allFish[0].getObjectByName("fish"));
+                        this.modifier.addModifier(this.bend);
+                        this.allFish[i].position.z = 150
+                        this.allFish[i].position.x = 400
+                        //this.allFish[i].visible = false
+                    }
+
+                    Object.assign(this.allFish[i], { movement: fish.movement });
+                    Object.assign(this.allFish[i], { updown: fish.updown });
+                    Object.assign(this.allFish[i], { score: fish.score });
+
                     this.hideShowAllFins(i, fish)
                     this.playing = true
 
                 });
-            })
+            });
+          
             // RENDER
             if (containertank) {
                 this.renderer = new Three.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });

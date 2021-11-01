@@ -1,15 +1,15 @@
 <template>
 <div id="app">
-    <!-- <fishtank :key="tankRefresh" />  -->
-    <creator v-if="$store.state.view == 'creator'" />
+    <fishtank :key="tankRefresh" />
+     <creator v-if="$store.state.view == 'creator'" />
     <attractor v-if="$store.state.view == 'attractor'" />
-    <final v-if="$store.state.view == 'final'" /> 
+    <final v-if="$store.state.view == 'final'" />  
 </div>
 </template>
 <script>
 import creator from "./components/creator.vue";
 import attractor from "./components/attractor.vue";
-// import fishtank from "./components/fishTank.vue";
+import fishtank from "./components/fishTank.vue";
 import final from "./components/final.vue";
 export default {
     data() {
@@ -20,7 +20,7 @@ export default {
     name: "App",
     components: {
         final,
-   //     fishtank,
+        fishtank,
         creator,
         attractor,
     },

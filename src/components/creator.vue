@@ -1,8 +1,9 @@
 <template>
 <div class="" style="position: relative">
-    <div class="score" style="position: absolute; top: 0; right: -300px; z-index: 1; width: 300px;">
+    <div class="score" style="position: absolute; top: 0; right: 300px; z-index: 1; width: 300px;">
         <h1>Score: {{score}}</h1>
         <p>How many fins are in the right place? Score more than 2 to keep afloat. <strong>Test use only</strong></p>
+        <pre>{{movement}}</pre>
     </div>
     <div id="container" style="">
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
@@ -43,15 +44,7 @@ import * as Three from "three";
 import {
     ModifierStack,
     Bend,
-    Twist,
-    Noise,
-    Cloth,
-    UserDefined,
-    Taper,
-    Break,
-    Bloat,
-    Vector3,
-    ModConstant
+
 } from "three.modifiers";
 import fininfo from './fininfo.vue'
 import howto from './howto.vue'
@@ -248,12 +241,20 @@ export default {
                 this.movement.smimWind = this.movement.smimWind + 5
             }
         },
+        movement: {
+            deep: true,
+            handler(val) {
+                if (val.updown > 8) {
+                    this.movement.updown = 8
+                }
+            }
+        },
         // UP DOWN FINS
         'fins.pelvic.selected'(val) {
             if (val == 'pelvic') {
-                this.movement.updown = this.movement.updown - 5
+                this.movement.updown = 2
             } else {
-                this.movement.updown = this.movement.updown + 5
+                this.movement.updown = 5
             }
         },
     },
@@ -421,33 +422,29 @@ export default {
             let move = true
             requestAnimationFrame(this.animate);
             var delta = this.clock.getDelta();
-            
 
-     
-          
-
-           
             this.modifier && this.modifier.apply();
 
             if (this.playing) {
+                this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
+                this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
+                // side fin
+                if (this.fishObject.getObjectByName(this.sideFin + '_right')) {
+                    this.fishObject.getObjectByName(this.sideFin).rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
+                    this.fishObject.getObjectByName(this.sideFin + '_right').rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
+                }
 
-                  this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
-            this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
-            // side fin
-            if (this.fishObject.getObjectByName(this.sideFin + '_right')) {
-                this.fishObject.getObjectByName(this.sideFin).rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
-                this.fishObject.getObjectByName(this.sideFin + '_right').rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
-            }
-    
-            if (this.scene.getObjectByName('eyeWrapper')) {
-                this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
-            }
+                if (this.scene.getObjectByName('eyeWrapper')) {
+                    this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
+                }
 
                 if (this.fishObject.position.y > -18.5) {
                     if (this.score <= 2) {
                         this.fishObject.position.y -= 0.07
+                    } else if (this.score > 5) {
+                        this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * 1
                     } else {
-                        this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown * 2
+                        this.fishObject.position.y = Math.sin(this.clock.getElapsedTime()) * this.movement.updown / 2
                     }
                     // WINDING
                     if (this.movement.smimWind <= 7) {
@@ -511,16 +508,16 @@ export default {
             dirLight.position.set(-1, 1.75, 10);
             dirLight.position.multiplyScalar(30);
             this.scene.add(dirLight);
-            dirLight.shadow.mapSize.width = 2048;
-            dirLight.shadow.mapSize.height = 2048;
-            const d = 50;
-            dirLight.shadow.camera.left = -d;
-            dirLight.shadow.camera.right = d;
-            dirLight.shadow.camera.top = d;
-            dirLight.shadow.camera.bottom = -d;
-            dirLight.shadow.camera.far = 3500;
-            dirLight.shadow.bias = -0.0001;
-            const dirLightHelper = new Three.DirectionalLightHelper(dirLight, 10);
+            // dirLight.shadow.mapSize.width = 2048;
+            // dirLight.shadow.mapSize.height = 2048;
+            // const d = 50;
+            // dirLight.shadow.camera.left = -d;
+            // dirLight.shadow.camera.right = d;
+            // dirLight.shadow.camera.top = d;
+            // dirLight.shadow.camera.bottom = -d;
+            // dirLight.shadow.camera.far = 3500;
+            // dirLight.shadow.bias = -0.0001;
+
             const loader = new Three.TextureLoader();
             loader.load(this.backgroundImage, (texture) => {
                 this.scene.background = texture;
@@ -528,9 +525,9 @@ export default {
             // Load object
             const gltfLoader = new GLTFLoader();
             gltfLoader.load(this.fishObjectUlr, (gltf) => {
-
                 this.fishObject = gltf.scene;
-                this.fishObject.castShadow = true;
+                this.fishObject.castShadow = false; //default is false
+                this.fishObject.receiveShadow = false; //default
                 this.fishObject.rotation.set(1.600, 0, 0)
                 this.scene.add(this.fishObject);
                 this.defaultPosition();
@@ -542,7 +539,7 @@ export default {
                 this.modifier.addModifier(this.bend);
 
                 const geometry = new Three.BoxGeometry(15, 10, 0.420);
-                const material = new Three.MeshBasicMaterial({ color: 0x00ff00 });
+
                 const cube = new Three.Mesh(geometry);
                 cube.material.opacity = 0;
                 cube.material.transparent = true;
