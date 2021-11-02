@@ -12,7 +12,7 @@ function animate() {
                 this.camera.position.x = 0
             }
             this.allFish.forEach((selectedFish, i) => {
-                if (i == 0) {
+            //    if (i == 0) {
                     this.modifier && this.modifier.apply();
                     this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
                     selectedFish.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
@@ -25,9 +25,13 @@ function animate() {
                     if (this.scene.getObjectByName('eyeWrapper')) {
                         this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
                     }
-                }
+            //    }
+                
 
+                // selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.updown / 8
                 // up down
+   
+            
                 if (selectedFish.score > 5) {
                     selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * 1
                 } else {

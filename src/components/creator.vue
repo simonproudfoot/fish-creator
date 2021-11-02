@@ -3,7 +3,7 @@
     <div class="score" style="position: absolute; top: 0; right: 300px; z-index: 1; width: 300px;">
         <h1>Score: {{score}}</h1>
         <p>How many fins are in the right place? Score more than 2 to keep afloat. <strong>Test use only</strong></p>
-        <pre>{{movement}}</pre>
+        
     </div>
     <div id="container" style="">
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">

@@ -6,7 +6,6 @@
     </div>
 </div>
 </template>
-
 <script>
 import * as Three from "three";
 import animate from '../functions/animatetank.js'
@@ -20,6 +19,8 @@ export default {
     name: "ThreeTest",
     data() {
         return {
+
+            mommyFish: null,
             modifier: [],
             bendSize: 0.4,
             bend: new Bend(0.1, 0.7, 0),
@@ -178,13 +179,13 @@ export default {
             this.scene.fog = new Three.Fog(color, near, far);
 
             const gltfLoader = new GLTFLoader();
-            this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
-                gltfLoader.load(this.fishObjectUlr, (gltf) => {
-
-                    this.allFish.push(gltf.scene);
-                    var fishObject = this.allFish[i];
+            gltfLoader.load(this.fishObjectUlr, (gltf) => {
+                this.mommyFish = gltf.scene
+                this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
+                    var fishObject = this.mommyFish.clone()
+                    this.allFish.push(fishObject);
                     if (i == 0) {
-                        const geometry = new Three.BoxBufferGeometry (15, 10, 0.420);
+                        const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
                         const cube = new Three.Mesh(geometry);
                         cube.material.opacity = 1;
                         cube.material.transparent = false;
@@ -199,43 +200,41 @@ export default {
                         cube.material.opacity = 0;
                         cube.material.transparent = true;
                         fishObject.add(cube);
-                        this.allFish[i].add(cube);
+                        //this.allFish[i].add(cube);
                     }
 
-                    this.scene.add(fishObject)
-
                     if (i != 0) {
-                        this.allFish[i].scale.set(0.020, 0.020, 0.020)
+                        fishObject.scale.set(0.020, 0.020, 0.020)
                         //this.allFish[i].position.x = 400
-                        console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
-                        this.allFish[i].position.y = Math.random() * (50 - -50) + -50;
-                        this.allFish[i].position.z = Math.random() * (80 - -200) + -200;
+                        console.log(fishObject.position.x = Math.random() * (400 - 0) + 0);
+                        fishObject.position.y = Math.random() * (50 - -50) + -50;
+                        fishObject.position.z = Math.random() * (80 - -200) + -200;
                     } else {
-                        this.allFish[i].scale.set(0.030, 0.030, 0.030)
-                        this.modifier = new ModifierStack(this.allFish[0].getObjectByName("fish"));
+                        fishObject.scale.set(0.030, 0.030, 0.030)
+                        this.modifier = new ModifierStack(fishObject.getObjectByName("fish"));
                         this.modifier.addModifier(this.bend);
-                        this.allFish[i].position.z = 150
-                        this.allFish[i].position.x = 400
+                        fishObject.position.z = 150
+                        fishObject.position.x = 400
                         //this.allFish[i].visible = false
                     }
 
-                    Object.assign(this.allFish[i], { movement: fish.movement });
-                    Object.assign(this.allFish[i], { updown: fish.updown });
-                    Object.assign(this.allFish[i], { score: fish.score });
-
+                    Object.assign(fishObject, { movement: fish.movement });
+                    Object.assign(fishObject, { updown: fish.updown });
+                    Object.assign(fishObject, { score: fish.score });
+                    this.scene.add(fishObject)
                     this.hideShowAllFins(i, fish)
                     this.playing = true
 
                 });
             });
-          
+
             // RENDER
             if (containertank) {
                 this.renderer = new Three.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
                 this.renderer.setSize(containertank.clientWidth, containertank.clientHeight);
                 this.renderer.outputEncoding = Three.sRGBEncoding;
                 this.renderer.setClearColor(0x000000, 0); // the default
-                
+
                 console.log(this.renderer)
                 containertank.appendChild(this.renderer.domElement);
                 setTimeout(() => {
