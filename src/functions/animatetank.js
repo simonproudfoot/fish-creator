@@ -27,12 +27,7 @@ function animate() {
                     }
                 }
 
-                
-
-                // selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.movement.updown / 8
                 // up down
-   
-            
                 if (selectedFish.score > 5) {
                     selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * 1
                 } else {

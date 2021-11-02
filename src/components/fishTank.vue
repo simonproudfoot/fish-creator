@@ -156,7 +156,7 @@ export default {
         init() {
             let containertank = document.getElementById("containertank");
             // camera
-            this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 1000); // last is depth
+            this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 800); // last is depth
             this.camera.position.set(400, 0, 410); // 450
             this.scene = new Three.Scene();
             // background
@@ -166,7 +166,7 @@ export default {
             light.groundColor.setHex(0x3eba00);
             light.color.setHex(0x00f5dc);
             this.scene.add(light);
-            const dirLight = new Three.DirectionalLight(0xffffff, 0.7);
+            const dirLight = new Three.DirectionalLight(0xffffff, 0.5);
             dirLight.color.setHex(0xffffff);
             dirLight.position.set(-1, 1.75, 70);
             dirLight.position.multiplyScalar(30);
@@ -184,7 +184,7 @@ export default {
                     this.allFish.push(gltf.scene);
                     var fishObject = this.allFish[i];
                     if (i == 0) {
-                        const geometry = new Three.BoxGeometry(15, 10, 0.420);
+                        const geometry = new Three.BoxBufferGeometry (15, 10, 0.420);
                         const cube = new Three.Mesh(geometry);
                         cube.material.opacity = 1;
                         cube.material.transparent = false;
@@ -206,8 +206,8 @@ export default {
 
                     if (i != 0) {
                         this.allFish[i].scale.set(0.020, 0.020, 0.020)
-                        this.allFish[i].position.x = 400
-                      console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
+                        //this.allFish[i].position.x = 400
+                        console.log(this.allFish[i].position.x = Math.random() * (400 - 0) + 0);
                         this.allFish[i].position.y = Math.random() * (50 - -50) + -50;
                         this.allFish[i].position.z = Math.random() * (80 - -200) + -200;
                     } else {
@@ -235,6 +235,8 @@ export default {
                 this.renderer.setSize(containertank.clientWidth, containertank.clientHeight);
                 this.renderer.outputEncoding = Three.sRGBEncoding;
                 this.renderer.setClearColor(0x000000, 0); // the default
+                
+                console.log(this.renderer)
                 containertank.appendChild(this.renderer.domElement);
                 setTimeout(() => {
                     this.changeSpeed(0);

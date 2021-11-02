@@ -491,7 +491,7 @@ export default {
         init() {
             let container = document.getElementById("container");
             // camera
-            this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 1000); // last is depth
+            this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 300); // last is depth
             this.camera.position.set(0, -1.21, 239); // 450
             this.scene = new Three.Scene();
             // background
@@ -538,7 +538,7 @@ export default {
                 this.modifier = new ModifierStack(this.fishObject.getObjectByName("fish"), this.fishObject.getObjectByName("eyes"));
                 this.modifier.addModifier(this.bend);
 
-                const geometry = new Three.BoxGeometry(15, 10, 0.420);
+                const geometry = new Three.BoxBufferGeometry (15, 10, 0.420);
 
                 const cube = new Three.Mesh(geometry);
                 cube.material.opacity = 0;
