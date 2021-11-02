@@ -3,9 +3,11 @@
     <video muted autoplay loop :src="require('@/assets/slave.mp4')"></video>
     <div id="containertank">
 
+        <img v-show="!playing" class="loading" :src="require('@/assets/loader.svg')" />
     </div>
 </div>
 </template>
+
 <script>
 import * as Three from "three";
 import animate from '../functions/animatetank.js'
@@ -19,7 +21,7 @@ export default {
     name: "ThreeTest",
     data() {
         return {
-
+            fishCounter: 0,
             mommyFish: null,
             modifier: [],
             bendSize: 0.4,
@@ -48,7 +50,7 @@ export default {
             visible: false,
             hidePlay: false,
             clock: new Three.Clock(),
-            mixer: null,
+
             showFish: "fishObject",
             ready: false,
             fishObject: "",
@@ -106,11 +108,7 @@ export default {
             this.fishObject.add(newFin);
         },
         // movement functions
-        changeSpeed(s) {
-            if (this.mixer) {
-                this.mixer.timeScale = s;
-            }
-        },
+
         convertDecimal(num, double) {
             let decimal = !double ? "0.0" + num : "0.00" + num;
             let converted = parseFloat(decimal);
@@ -154,7 +152,15 @@ export default {
             })
         },
         animate,
-        init() {
+
+        modelLoader(url) {
+            const loader = new GLTFLoader();
+            return new Promise((resolve, reject) => {
+                loader.load(this.fishObjectUlr, data => resolve(data), null, reject);
+                Three.Cache.enabled = true
+            });
+        },
+        async init() {
             let containertank = document.getElementById("containertank");
             // camera
             this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 800); // last is depth
@@ -167,66 +173,68 @@ export default {
             light.groundColor.setHex(0x3eba00);
             light.color.setHex(0x00f5dc);
             this.scene.add(light);
-            const dirLight = new Three.DirectionalLight(0xffffff, 0.5);
+
+            const dirLight = new Three.DirectionalLight(0xffffff, 1);
             dirLight.color.setHex(0xffffff);
-            dirLight.position.set(-1, 1.75, 70);
+            dirLight.position.set(-1, 1.75, 10);
             dirLight.position.multiplyScalar(30);
             this.scene.add(dirLight);
-            // fog 
-            const near = 20;
+
+            const near = 1;
             const far = 800;
             const color = '#2a8f99';
             this.scene.fog = new Three.Fog(color, near, far);
 
-            const gltfLoader = new GLTFLoader();
-            gltfLoader.load(this.fishObjectUlr, (gltf) => {
-                this.mommyFish = gltf.scene
-                this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
-                    var fishObject = this.mommyFish.clone()
-                    this.allFish.push(fishObject);
-                    if (i == 0) {
-                        const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
-                        const cube = new Three.Mesh(geometry);
-                        cube.material.opacity = 1;
-                        cube.material.transparent = false;
-                        cube.position.set(-360.000, 150.000, 16.660)
-                        cube.rotation.set(0, 0.045, 0)
-                        cube.scale.set(20.000, 20.000, 21.470)
-                        cube.add(fishObject.getObjectByName('eyes'))
-                        cube.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
-                        cube.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
-                        cube.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
-                        cube.name = 'eyeWrapper'
-                        cube.material.opacity = 0;
-                        cube.material.transparent = true;
-                        fishObject.add(cube);
-                        //this.allFish[i].add(cube);
-                    }
+            const gltfData = await this.modelLoader()
+            this.mommyFish = gltfData.scene
 
-                    if (i != 0) {
-                        fishObject.scale.set(0.020, 0.020, 0.020)
-                        //this.allFish[i].position.x = 400
-                        console.log(fishObject.position.x = Math.random() * (400 - 0) + 0);
-                        fishObject.position.y = Math.random() * (50 - -50) + -50;
-                        fishObject.position.z = Math.random() * (80 - -200) + -200;
-                    } else {
-                        fishObject.scale.set(0.030, 0.030, 0.030)
-                        this.modifier = new ModifierStack(fishObject.getObjectByName("fish"));
-                        this.modifier.addModifier(this.bend);
-                        fishObject.position.z = 150
-                        fishObject.position.x = 400
-                        //this.allFish[i].visible = false
-                    }
+            this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
 
-                    Object.assign(fishObject, { movement: fish.movement });
-                    Object.assign(fishObject, { updown: fish.updown });
-                    Object.assign(fishObject, { score: fish.score });
-                    this.scene.add(fishObject)
-                    this.hideShowAllFins(i, fish)
-                    this.playing = true
+                var fishObject = this.mommyFish.clone()
+                this.allFish.push(fishObject);
+                if (i == 0) {
+                    const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
+                    const cube = new Three.Mesh(geometry);
+                    cube.material.opacity = 1;
+                    cube.material.transparent = false;
+                    cube.position.set(-360.000, 150.000, 16.660)
+                    cube.rotation.set(0, 0.045, 0)
+                    cube.scale.set(20.000, 20.000, 21.470)
+                    cube.add(fishObject.getObjectByName('eyes'))
+                    cube.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
+                    cube.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
+                    cube.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
+                    cube.name = 'eyeWrapper'
+                    cube.material.opacity = 0;
+                    cube.material.transparent = true;
+                    fishObject.add(cube);
+                }
 
-                });
+                if (i != 0) {
+                    fishObject.scale.set(0.020, 0.020, 0.020)
+                    console.log(fishObject.position.x = Math.random() * (400 - 0) + 0);
+                    fishObject.position.y = Math.random() * (50 - -50) + -50;
+                    fishObject.position.z = Math.random() * (80 - -200) + -200;
+                } else {
+                    fishObject.scale.set(0.030, 0.030, 0.030)
+
+                    fishObject.position.z = 150
+                    fishObject.position.x = 400
+
+                }
+
+                Object.assign(fishObject, { movement: fish.movement });
+                Object.assign(fishObject, { updown: fish.updown });
+                Object.assign(fishObject, { score: fish.score });
+                this.scene.add(fishObject)
+                this.hideShowAllFins(i, fish)
+
             });
+
+            this.allFish[0].getObjectByName('fish').name = 'bendyFish'
+            this.modifier = new ModifierStack(this.allFish[0].getObjectByName("bendyFish"));
+            this.modifier.addModifier(this.bend);
+            this.playing = true
 
             // RENDER
             if (containertank) {
@@ -235,22 +243,14 @@ export default {
                 this.renderer.outputEncoding = Three.sRGBEncoding;
                 this.renderer.setClearColor(0x000000, 0); // the default
 
-                console.log(this.renderer)
                 containertank.appendChild(this.renderer.domElement);
-                setTimeout(() => {
-                    this.changeSpeed(0);
-                }, 1000);
+
             }
         }
     },
     mounted() {
-        // this.$store.state.sounds.test.loop = false
-        // this.$store.state.sounds.test.stop()
-        // this.$store.state.sounds.fail.play()
-        // this.$store.state.sounds.swim.play()
         this.init();
         this.animate();
-        // console.log(this.movement)
     },
 };
 </script>

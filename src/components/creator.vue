@@ -1,11 +1,8 @@
 <template>
 <div class="" style="position: relative">
-    <div class="score" style="position: absolute; top: 0; right: 300px; z-index: 1; width: 300px;">
-        <h1>Score: {{score}}</h1>
-        <p>How many fins are in the right place? Score more than 2 to keep afloat. <strong>Test use only</strong></p>
-        
-    </div>
+
     <div id="container" style="">
+        <img v-show="!fishObject" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
         <img v-if="!playing" class="close" :src="require('@/assets/home.svg')" @click="$store.commit('SET_VIEW', 'attractor')" />
@@ -49,10 +46,11 @@ import {
 import fininfo from './fininfo.vue'
 import howto from './howto.vue'
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+
 export default {
     name: "ThreeTest",
     components: { fininfo, howto },
-
+    props: ['resetCreator'],
     data() {
         return {
             sideFin: '',
@@ -76,7 +74,7 @@ export default {
             visible: false,
             hidePlay: false,
             clock: new Three.Clock(),
-            mixer: null,
+
             showFish: "fishObject",
             ready: false,
             fishObject: "",
@@ -157,6 +155,9 @@ export default {
         }
     },
     watch: {
+        resetCreator() {
+
+        },
         saving(val) {
             if (val) {
                 this.fishObject.visible = false
@@ -203,7 +204,6 @@ export default {
                 //  alert
                 this.defaultPosition()
                 this.changeSpeed(0),
-
                     setTimeout(() => {
                         this.movement.roll = 8
                         this.movement.updown = 8
@@ -211,7 +211,6 @@ export default {
                     }, 500);
             }
         },
-
         // ROLL FINS 
         'fins.dorsal.selected'(val) {
             if (val == 'dorsal') {
@@ -241,14 +240,6 @@ export default {
                 this.movement.smimWind = this.movement.smimWind + 5
             }
         },
-        movement: {
-            deep: true,
-            handler(val) {
-                if (val.updown > 8) {
-                    this.movement.updown = 8
-                }
-            }
-        },
         // UP DOWN FINS
         'fins.pelvic.selected'(val) {
             if (val == 'pelvic') {
@@ -257,6 +248,15 @@ export default {
                 this.movement.updown = 5
             }
         },
+        movement: {
+            deep: true,
+            handler(val) {
+                if (val.updown > 8) {
+                    this.movement.updown = 8
+                }
+            }
+        },
+
     },
     methods: {
         closePop() {
@@ -327,7 +327,7 @@ export default {
             this.rotate("z", 100, 2, false);
             this.rotate("x", 100, 2, false);
             setTimeout(() => {
-                this.changeSpeed(0);
+
                 this.hidePlay = false;
                 this.defaultPosition();
                 this.playing = false;
@@ -335,11 +335,7 @@ export default {
             }, 5000);
         },
         // movement functions
-        changeSpeed(s) {
-            if (this.mixer) {
-                this.mixer.timeScale = s;
-            }
-        },
+
         convertDecimal(num, double) {
             let decimal = !double ? "0.0" + num : "0.00" + num;
             let converted = parseFloat(decimal);
@@ -355,13 +351,6 @@ export default {
             this.fishObject.scale ? this.fishObject.scale.set(0.030, 0.030, 0.030) : null
             this.fishObject.position ? this.fishObject.position.set(-0.860, 2.280, 0.030) : null
             this.fishObject.rotation ? this.fishObject.rotation.set(0, 0, 0) : null
-
-            //this.scene.rotation.x = 2.540
-
-            // eyes 
-
-            //front 71.260
-            // back 30.640
         },
         showFin(position) {
             this.fins[position.split('-').pop()].selected = this.draggingFin
@@ -420,12 +409,12 @@ export default {
         animate() {
             let speed = 1
             let move = true
-            requestAnimationFrame(this.animate);
-            var delta = this.clock.getDelta();
 
-            this.modifier && this.modifier.apply();
+            requestAnimationFrame(this.animate);
 
             if (this.playing) {
+
+                this.modifier && this.modifier.apply();
                 this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
                 this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
                 // side fin
@@ -486,9 +475,19 @@ export default {
                 this.$store.state.sounds.fail.pause()
                 this.$store.state.sounds.fail.currentTime = 0;
             }
-            this.renderer.render(this.scene, this.camera);
+            if (this.fishObject) {
+                this.renderer.render(this.scene, this.camera);
+            }
         },
-        init() {
+
+        modelLoader(url) {
+            const loader = new GLTFLoader();
+            return new Promise((resolve, reject) => {
+                loader.load(this.fishObjectUlr, data => resolve(data), null, reject);
+                Three.Cache.enabled = true
+            });
+        },
+        async init() {
             let container = document.getElementById("container");
             // camera
             this.camera = new Three.PerspectiveCamera(10, 1920 / 1080, 10, 300); // last is depth
@@ -508,69 +507,57 @@ export default {
             dirLight.position.set(-1, 1.75, 10);
             dirLight.position.multiplyScalar(30);
             this.scene.add(dirLight);
-            // dirLight.shadow.mapSize.width = 2048;
-            // dirLight.shadow.mapSize.height = 2048;
-            // const d = 50;
-            // dirLight.shadow.camera.left = -d;
-            // dirLight.shadow.camera.right = d;
-            // dirLight.shadow.camera.top = d;
-            // dirLight.shadow.camera.bottom = -d;
-            // dirLight.shadow.camera.far = 3500;
-            // dirLight.shadow.bias = -0.0001;
 
             const loader = new Three.TextureLoader();
             loader.load(this.backgroundImage, (texture) => {
                 this.scene.background = texture;
             });
             // Load object
-            const gltfLoader = new GLTFLoader();
-            gltfLoader.load(this.fishObjectUlr, (gltf) => {
-                this.fishObject = gltf.scene;
-                this.fishObject.castShadow = false; //default is false
-                this.fishObject.receiveShadow = false; //default
-                this.fishObject.rotation.set(1.600, 0, 0)
-                this.scene.add(this.fishObject);
-                this.defaultPosition();
-                this.hideAllFins();
+            var gltf = await this.modelLoader()
+            Three.Cache.enabled = true
+            this.fishObject = gltf.scene;
+            this.fishObject.getObjectByName('fish').name = 'newFish'
+            this.fishObject.castShadow = false; //default is false
+            this.fishObject.receiveShadow = false; //default
+            this.fishObject.rotation.set(1.600, 0, 0)
+            this.scene.add(this.fishObject);
+            this.defaultPosition();
+            this.hideAllFins();
 
-                var arr = ['0x3a911a', '0xad821c', '0x154d59']
-                this.fishColor = arr[Math.floor(Math.random() * arr.length)];
-                this.modifier = new ModifierStack(this.fishObject.getObjectByName("fish"), this.fishObject.getObjectByName("eyes"));
-                this.modifier.addModifier(this.bend);
+            var arr = ['0x3a911a', '0xad821c', '0x154d59']
+            this.fishColor = arr[Math.floor(Math.random() * arr.length)];
+            this.modifier = new ModifierStack(this.fishObject.getObjectByName("newFish"));
+            this.modifier.addModifier(this.bend);
 
-                const geometry = new Three.BoxBufferGeometry (15, 10, 0.420);
+            const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
 
-                const cube = new Three.Mesh(geometry);
-                cube.material.opacity = 0;
-                cube.material.transparent = true;
-                cube.position.set(-360.000, 150.000, 16.660)
-                cube.rotation.set(0, 0.045, 0)
-                cube.scale.set(20.000, 20.000, 21.470)
-                cube.name = 'eyeWrapper'
+            const cube = new Three.Mesh(geometry);
+            cube.material.opacity = 0;
+            cube.material.transparent = true;
+            cube.position.set(-360.000, 150.000, 16.660)
+            cube.rotation.set(0, 0.045, 0)
+            cube.scale.set(20.000, 20.000, 21.470)
+            cube.name = 'eyeWrapper'
 
-                this.fishObject.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
-                this.fishObject.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
-                this.fishObject.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
+            this.fishObject.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
+            this.fishObject.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
+            this.fishObject.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
 
-                cube.add(this.fishObject.getObjectByName('eyes'))
+            cube.add(this.fishObject.getObjectByName('eyes'))
 
-                this.fishObject.add(cube);
-
-            });
+            this.fishObject.add(cube);
 
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
             this.renderer.outputEncoding = Three.sRGBEncoding;
             container.appendChild(this.renderer.domElement);
-            setTimeout(() => {
-                this.changeSpeed(0);
-            }, 1000);
+
         },
     },
-    beforeDestroy() {
-        this.scene.remove.apply(this.scene, this.scene.children);
-    },
+    // beforeDestroy() {
+    //     this.scene.remove.apply(this.scene, this.scene.children);
+    // },
     mounted() {
         this.init();
         this.animate();
