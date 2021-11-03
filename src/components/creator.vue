@@ -11,7 +11,7 @@
             <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
         </template>
         <transition name="fade">
-            <footer v-if="!playing || ready && fishObject" class="footer">
+            <footer v-if="!playing && ready" class="footer">
                 <div v-for="(fin, name, i) in fins" class="fin" :key="i" :class="'fin-'+name">
                     <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
@@ -192,7 +192,7 @@ export default {
                 if (this.score > 2) {
                     this.$store.state.sounds.test.loop = true
                     this.$store.state.sounds.test.play()
-                    this.changeSpeed(1)
+                  
                 } else {
                     this.$store.state.sounds.fail.loop = false
                     this.$store.state.sounds.fail.play()
@@ -205,7 +205,7 @@ export default {
             } else {
                 //  alert
                 this.defaultPosition()
-                this.changeSpeed(0),
+              
                     setTimeout(() => {
                         this.movement.roll = 8
                         this.movement.updown = 8
@@ -521,10 +521,10 @@ export default {
             });
             // Load object
             var gltf = await this.modelLoader()
-            Three.Cache.enabled = true
+            // Three.Cache.enabled = true
             this.fishObject = gltf.scene;
 
-             this.fishObject.getObjectByName('fish').material.map.image.src = this.fishTexture.src
+            this.fishObject.getObjectByName('fish').material.map.image.src = this.fishTexture.src
 
             var arr = ['0x3a911a', '0xad821c', '0x154d59']
             this.fishColor = arr[Math.floor(Math.random() * arr.length)];
@@ -567,22 +567,44 @@ export default {
             this.renderer.outputEncoding = Three.sRGBEncoding;
             container.appendChild(this.renderer.domElement);
 
-            this.ready = true
+            return true
 
         },
     },
     beforeDestroy() {
         this.scene.remove.apply(this.scene, this.scene.children);
     },
+
+    // var imgnew = new Image()
+    // imgnew.src = require("@/assets/map1.jpg")
+    // this.fishObject.getObjectByName('newFish').material.map.image.src = this.fishTexture.src
+
+    // console.log(this.fishObject.getObjectByName('newFish').material.map.image.src)
+
+    //this.fishObject.getObjectByName('fish').material.map.image.src = this.fishTexture.src
+    // async mounted() {
+    //     try {
+    //         await this.init()
+    //     } catch (error) {
+    //         console.log(error)
+    //     } finally {
+    //         this.ready = true
+    //         setTimeout(() => {
+    //              this.animate()
+    //         }, 2000);
+
+    //     }
+    // }
+
     mounted() {
         var imgnew = new Image()
         imgnew.src = this.colors[0]
-        imgnew.onload = () => {
+        imgnew.onload = async () => {
             //Update Texture
             this.fishTexture = imgnew
-
-            this.init();
-
+            await this.init();
+            this.ready = true
+            this.animate()
         }
 
     },
@@ -605,6 +627,7 @@ export default {
     height: 1080px;
     color: #06909c;
     overflow: hidden;
+       background-color: #ddf3f5;
 }
 
 .controls {

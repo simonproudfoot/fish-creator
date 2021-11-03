@@ -1,9 +1,9 @@
 <template>
 <div id="app">
-    <fishtank :key="tankRefresh" />
-    <creator v-if="$store.state.view == 'creator'"/>
-    <attractor v-show="$store.state.view == 'attractor'" />
-    <final v-show="$store.state.view == 'final'" />
+    <fishtank :key="tankRefresh"  v-if="!test"/>
+    <creator />
+    <attractor v-show="$store.state.view == 'attractor'  && !test" />
+    <final v-show="$store.state.view == 'final' && !test" />
 </div>
 </template>
 
@@ -15,6 +15,7 @@ import final from "./components/final.vue";
 export default {
     data() {
         return {
+            test: true,
             tankRefresh: 0,
             ready: false,
             startCreator: false
@@ -109,6 +110,7 @@ body {
     margin: 0;
     text-align: center;
     font-size: 20px;
+ 
 
 }
 
