@@ -192,7 +192,7 @@ export default {
                 if (this.score > 2) {
                     this.$store.state.sounds.test.loop = true
                     this.$store.state.sounds.test.play()
-                  
+
                 } else {
                     this.$store.state.sounds.fail.loop = false
                     this.$store.state.sounds.fail.play()
@@ -205,12 +205,12 @@ export default {
             } else {
                 //  alert
                 this.defaultPosition()
-              
-                    setTimeout(() => {
-                        this.movement.roll = 8
-                        this.movement.updown = 8
-                        this.movement.smimWind = 8
-                    }, 500);
+
+                setTimeout(() => {
+                    this.movement.roll = 8
+                    this.movement.updown = 8
+                    this.movement.smimWind = 8
+                }, 500);
             }
         },
         // ROLL FINS 
@@ -521,10 +521,11 @@ export default {
             });
             // Load object
             var gltf = await this.modelLoader()
-            // Three.Cache.enabled = true
-            this.fishObject = gltf.scene;
+         Three.Cache.enabled = true
 
-            this.fishObject.getObjectByName('fish').material.map.image.src = this.fishTexture.src
+            gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture
+            gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
+            this.fishObject = gltf.scene;
 
             var arr = ['0x3a911a', '0xad821c', '0x154d59']
             this.fishColor = arr[Math.floor(Math.random() * arr.length)];
@@ -605,6 +606,7 @@ export default {
             await this.init();
             this.ready = true
             this.animate()
+            console.log(this.fishTexture)
         }
 
     },
@@ -627,7 +629,7 @@ export default {
     height: 1080px;
     color: #06909c;
     overflow: hidden;
-       background-color: #ddf3f5;
+    background-color: #ddf3f5;
 }
 
 .controls {
