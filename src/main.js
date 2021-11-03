@@ -7,11 +7,29 @@ import DatGui from '@cyrilf/vue-dat-gui'
 Vue.use(DatGui)
 const store = new Vuex.Store({
   state: {
-    view: 'attractor', // attractor, creator, fishtank, final
+    view: 'creator', // attractor, creator, fishtank, final
     finInfo: '',
     fishes: [],
     howto: false,
     reset: 0,
+    colors: {
+      default: {
+        finColor: '',
+        file: require("@/assets/map-default.jpg")
+      },
+      red: {
+        finColor: '#970d51',
+        file: require("@/assets/map-red.jpg")
+      },
+      green: {
+        finColor: '#1f7321',
+        file: require("@/assets/map-green.jpg")
+      },
+      blue: {
+        finColor: '#282369',
+        file: require("@/assets/map-blue.jpg")
+      }
+    },
     sounds: {
       swim: new Audio(require("@/assets/sound/swim.wav")),
       test: new Audio(require("@/assets/sound/test.mp3")),

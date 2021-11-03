@@ -1,6 +1,5 @@
 <template>
 <div class="" style="position: relative">
-
     <div id="container" style="">
         <img v-show="!fishObject || !ready" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
@@ -29,7 +28,7 @@
             </footer>
         </transition>
     </div>
-    <fininfo v-if="$store.state.finInfo.length" />
+    <fininfo v-if="$store.state.finInfo" />
     <howto v-if="$store.state.howto" />
 </div>
 </template>
@@ -50,28 +49,13 @@ export default {
     props: ['resetCreator'],
     data() {
         return {
+
+            colorSected: '',
             fishTexture: {
                 image: new Image(),
                 finColor: ''
             },
-            colors: {
-                default: {
-                    finColor: '',
-                    file: require("@/assets/map-default.jpg")
-                },
-                red: {
-                    finColor: '#970d51',
-                    file: require("@/assets/map-red.jpg")
-                },
-                green: {
-                    finColor: '#1f7321',
-                    file: require("@/assets/map-green.jpg")
-                },
-                blue: {
-                    finColor: '#282369',
-                    file: require("@/assets/map-blue.jpg")
-                }
-            },
+
             sideFin: '',
             modifier: '',
             bendSize: 0.4,
@@ -85,7 +69,7 @@ export default {
                 y: '',
                 z: '',
             },
-            fishColor: 'green',
+            fishColor: '',
             draggingFin: "",
             playing: false,
 
@@ -288,9 +272,11 @@ export default {
                     Object.assign(final, {
                         [key]: val
                     });
-                })
-
-                Object.assign(final, { color: this.fishColor })
+                })  
+                
+                Object.assign(final, { color: this.colorSected })
+                Object.assign(final, { finColor: this.fishTexture.finColor })
+       
                 Object.assign(final, { movement: this.movement })
                 Object.assign(final, { score: this.score })
                 await this.$store.commit('ADD_FISH', final)
@@ -558,9 +544,10 @@ export default {
         var arr = ['default', 'red', 'green', 'blue']
         var color = arr[Math.floor(Math.random() * arr.length)];
         var finColor = ''
+        this.colorSected = color
 
-        finColor = this.colors[color].finColor
-        imgnew.src = this.colors[color].file
+        finColor = this.$store.state.colors[color].finColor
+        imgnew.src = this.$store.state.colors[color].file
 
         imgnew.onload = async () => {
             //Update Texture
