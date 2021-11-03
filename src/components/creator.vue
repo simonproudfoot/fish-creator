@@ -2,7 +2,7 @@
 <div class="" style="position: relative">
 
     <div id="container" style="">
-        <img v-show="!fishObject" class="loading" :src="require('@/assets/loader.svg')" />
+        <img v-show="!fishObject || !ready" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
         <img v-if="!playing" class="close" :src="require('@/assets/home.svg')" @click="$store.commit('SET_VIEW', 'attractor')" />
@@ -11,7 +11,7 @@
             <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
         </template>
         <transition name="fade">
-            <footer v-if="!playing" class="footer">
+            <footer v-if="!playing || ready && fishObject" class="footer">
                 <div v-for="(fin, name, i) in fins" class="fin" :key="i" :class="'fin-'+name">
                     <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
@@ -21,11 +21,9 @@
                         fin
                     </h3>
                 </div>
-
                 <div class="button green test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">Test!</div>
-
             </footer>
-            <footer class="footer--playing" v-else>
+            <footer class="footer--playing" v-if="playing">
                 <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Try a different fin selection</div>
                 <div class="button green" v-if="score >=2 && !saving" @click="save">Swim!</div>
             </footer>
@@ -53,6 +51,7 @@ export default {
     props: ['resetCreator'],
     data() {
         return {
+            fishTexture: new Image(),
             sideFin: '',
             modifier: '',
             bendSize: 0.4,
@@ -81,6 +80,9 @@ export default {
             scene: "",
             fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
+            colors: [
+                require("@/assets/map1.jpg")
+            ],
             backFin: "",
 
             topFin: "",
@@ -155,8 +157,8 @@ export default {
         }
     },
     watch: {
-        resetCreator() {
-
+        ready(v) {
+            v ? this.animate() : null
         },
         saving(val) {
             if (val) {
@@ -415,6 +417,11 @@ export default {
             if (this.playing) {
 
                 this.modifier && this.modifier.apply();
+                if (this.scene.getObjectByName('eyeWrapper')) {
+                    this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.250 * 0.150
+                    this.scene.getObjectByName('eyes').position.z = Math.sin(this.clock.getElapsedTime() * 3) * 0.425 * 0.430
+                    this.scene.getObjectByName('eyes').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.360 * 0.360
+                }
                 this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
                 this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
                 // side fin
@@ -423,9 +430,9 @@ export default {
                     this.fishObject.getObjectByName(this.sideFin + '_right').rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
                 }
 
-                if (this.scene.getObjectByName('eyeWrapper')) {
-                    this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
-                }
+                // if (this.scene.getObjectByName('eyeWrapper')) {
+                //     this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
+                // }
 
                 if (this.fishObject.position.y > -18.5) {
                     if (this.score <= 2) {
@@ -475,7 +482,7 @@ export default {
                 this.$store.state.sounds.fail.pause()
                 this.$store.state.sounds.fail.currentTime = 0;
             }
-            if (this.fishObject) {
+            if (this.fishObject && this.fishTexture.src) {
                 this.renderer.render(this.scene, this.camera);
             }
         },
@@ -516,32 +523,39 @@ export default {
             var gltf = await this.modelLoader()
             Three.Cache.enabled = true
             this.fishObject = gltf.scene;
+
+             this.fishObject.getObjectByName('fish').material.map.image.src = this.fishTexture.src
+
+            var arr = ['0x3a911a', '0xad821c', '0x154d59']
+            this.fishColor = arr[Math.floor(Math.random() * arr.length)];
+
+            //
             this.fishObject.getObjectByName('fish').name = 'newFish'
             this.fishObject.castShadow = false; //default is false
             this.fishObject.receiveShadow = false; //default
             this.fishObject.rotation.set(1.600, 0, 0)
+
             this.scene.add(this.fishObject);
             this.defaultPosition();
             this.hideAllFins();
 
-            var arr = ['0x3a911a', '0xad821c', '0x154d59']
-            this.fishColor = arr[Math.floor(Math.random() * arr.length)];
             this.modifier = new ModifierStack(this.fishObject.getObjectByName("newFish"));
             this.modifier.addModifier(this.bend);
 
-            const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
+            const geometry = new Three.BoxBufferGeometry(80, 10, 5);
 
             const cube = new Three.Mesh(geometry);
             cube.material.opacity = 0;
             cube.material.transparent = true;
-            cube.position.set(-360.000, 150.000, 16.660)
-            cube.rotation.set(0, 0.045, 0)
-            cube.scale.set(20.000, 20.000, 21.470)
+            cube.material.wireframe = false
+            cube.position.set(72.930, 150.000, 50.000)
+            cube.rotation.set(0, -0.180, 0)
+            cube.scale.set(20.000, 20.000, 13.140)
             cube.name = 'eyeWrapper'
 
-            this.fishObject.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
+            this.fishObject.getObjectByName('eyes').position.set(-27.200, 0.180, 1.010)
             this.fishObject.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
-            this.fishObject.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
+            this.fishObject.getObjectByName('eyes').scale.set(0.050, 0.050, 0.100)
 
             cube.add(this.fishObject.getObjectByName('eyes'))
 
@@ -553,14 +567,23 @@ export default {
             this.renderer.outputEncoding = Three.sRGBEncoding;
             container.appendChild(this.renderer.domElement);
 
+            this.ready = true
+
         },
     },
-    // beforeDestroy() {
-    //     this.scene.remove.apply(this.scene, this.scene.children);
-    // },
+    beforeDestroy() {
+        this.scene.remove.apply(this.scene, this.scene.children);
+    },
     mounted() {
-        this.init();
-        this.animate();
+        var imgnew = new Image()
+        imgnew.src = this.colors[0]
+        imgnew.onload = () => {
+            //Update Texture
+            this.fishTexture = imgnew
+
+            this.init();
+
+        }
 
     },
 };

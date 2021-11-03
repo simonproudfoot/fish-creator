@@ -1,7 +1,7 @@
 <template>
 <div id="app">
     <fishtank :key="tankRefresh" />
-    <creator v-if="$store.state.view == 'creator'" />
+    <creator v-if="$store.state.view == 'creator'"/>
     <attractor v-show="$store.state.view == 'attractor'" />
     <final v-show="$store.state.view == 'final'" />
 </div>
@@ -24,8 +24,8 @@ export default {
     components: {
         final,
         fishtank,
-        creator,
         attractor,
+        creator,
     },
     watch: {
         '$store.state.fishes'(val) {
@@ -134,18 +134,18 @@ h3 {
 }
 
 .loading {
-position: absolute;
-top: 0;
-left: 0;
-transform: translate(-50%, -50%);
-height: 100px;
-width: 100px;
--webkit-animation: fail 2s linear infinite;
-animation: fail 2s linear infinite;
-right: 0;
-bottom: 0;
-margin: auto;
-    
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    height: 100px;
+    width: 100px;
+    -webkit-animation: fail 2s linear infinite;
+    animation: fail 2s linear infinite;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+
 }
 
 @keyframes fail {
