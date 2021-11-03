@@ -7,7 +7,7 @@ import DatGui from '@cyrilf/vue-dat-gui'
 Vue.use(DatGui)
 const store = new Vuex.Store({
   state: {
-    view: 'attractor', // attractor, creator, fishtank
+    view: 'attractor', // attractor, creator, fishtank, final
     finInfo: '',
     fishes: [],
     howto: false,

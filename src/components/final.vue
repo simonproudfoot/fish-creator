@@ -14,6 +14,7 @@
                 <img class="triangle" :src="require('@/assets/speech.svg')" />
                 <img width="40" height="40" :src="require('@/assets/info-white.svg')" />{{fish.name}}</span>
             <img class="fish_image" :src="require('@/assets/'+fish.img)" />
+
         </div>
     </template>
     <div class="infowindow" v-if="popup">
@@ -26,13 +27,17 @@
                 <div class="flex">
                     <div style="width: 50%">
                         <h1 class="my-0" style="text-transform: capitalize">{{species[selected].name}}</h1>
+                        
                     </div>
                     <div style="width: 50%">
                         <p style="margin-top: 0" v-html="species[selected].content"></p>
                     </div>
                 </div>
+           
             </div>
-            <img class="fish_large" :src="require('@/assets/'+species[selected].img)" />
+
+              <video autoplay loop muted :src="require('@/assets/video/'+species[selected].vid)"></video> 
+            <!-- <img class="fish_large" :src="require('@/assets/'+species[selected].img)" /> -->
         </div>
     </div>
 </div>
@@ -53,6 +58,7 @@ export default {
             species: [{
                     name: 'Atlantic Mackerel',
                     img: 'mackerel.svg',
+                    vid: 'mackeral.mp4',
                     top: 587,
                     left: 101,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -60,6 +66,7 @@ export default {
                 {
                     name: 'Sea Bass',
                     img: 'bass.svg',
+                    vid: 'bass.mp4',
                     top: 772,
                     left: 545,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -67,6 +74,7 @@ export default {
                 {
                     name: 'Red Gurnard',
                     img: 'gurnard.svg',
+                    vid: 'gurnard.mp4',
                     top: 568,
                     left: 920,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -74,6 +82,7 @@ export default {
                 {
                     name: 'European Plaice',
                     img: 'plaice.svg',
+                    vid: 'plaice.mp4',
                     top: 688,
                     left: 1395,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -195,7 +204,7 @@ export default {
 
 .endscreen {
     background-image: url('../assets/end.png');
-        background-color: #ddf3f5;
+    background-color: #ddf3f5;
 }
 
 .infowindow__content {
@@ -232,12 +241,12 @@ export default {
 }
 
 .boatQuote .triangle {
-position: absolute;
-width: 65px;
-height: 67px;
-bottom: 30px;
-left: -46px;
-transform: rotate(90deg);
+    position: absolute;
+    width: 65px;
+    height: 67px;
+    bottom: 30px;
+    left: -46px;
+    transform: rotate(90deg);
 }
 
 .boatQuote {

@@ -1,12 +1,11 @@
 <template>
 <div id="app">
-    <fishtank :key="tankRefresh"  v-if="!test"/>
+    <fishtank :key="tankRefresh" v-if="!test" />
     <creator v-if="$store.state.view == 'creator'" />
     <attractor v-show="$store.state.view == 'attractor'  && !test" />
     <final v-show="$store.state.view == 'final' && !test" />
 </div>
 </template>
-
 <script>
 import creator from "./components/creator.vue";
 import attractor from "./components/attractor.vue";
@@ -109,7 +108,6 @@ body {
     margin: 0;
     text-align: center;
     font-size: 20px;
- 
 
 }
 
