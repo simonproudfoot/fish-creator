@@ -1,26 +1,28 @@
 <template>
 <div id="app">
-    <fishtank :key="tankRefresh" v-if="!test" />
+    <fishtank :key="tankRefresh" />
     <creator v-if="$store.state.view == 'creator'" />
-    <attractor v-show="$store.state.view == 'attractor'  && !test" />
-    <final v-show="$store.state.view == 'final' && !test" />
+    <attractor v-show="$store.state.view == 'attractor'" />
+    <final v-show="$store.state.view == 'final'" />
 </div>
 </template>
+
 <script>
 import creator from "./components/creator.vue";
 import attractor from "./components/attractor.vue";
 import fishtank from "./components/fishTank.vue";
 import final from "./components/final.vue";
 export default {
+    name: "App",
     data() {
         return {
-            test: false,
+            test: true,
             tankRefresh: 0,
             ready: false,
             startCreator: false
         }
     },
-    name: "App",
+
     components: {
         final,
         fishtank,

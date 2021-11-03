@@ -1,8 +1,7 @@
 <template>
 <div style="position: relative;">
-    <video muted :autoplay="playing" loop :src="require('@/assets/slave.mp4')"></video>
+    <video autoplay muted loop :src="require('@/assets/slave.mp4')"></video>
     <div id="containertank">
-
         <img v-show="!playing" class="loading" :src="require('@/assets/loader.svg')" />
     </div>
 </div>
@@ -21,10 +20,6 @@ export default {
     name: "ThreeTest",
     data() {
         return {
-            fishTexture: new Image(),
-            colors: [
-                require("@/assets/map1.jpg")
-            ],
 
             fishCounter: 0,
             mommyFish: null,
@@ -256,19 +251,19 @@ export default {
         }
 
     },
-    mounted() {
-        var imgnew = new Image()
-        imgnew.src = this.colors[0]
-        imgnew.onload = async () => {
-            //Update Texture
-            this.fishTexture = imgnew
-            await this.init();
-            this.ready = true
-            this.animate()
-            console.log(this.fishTexture)
-        }
+    async mounted() {
+        //   var imgnew = new Image()
+        //imgnew.src = this.colors[0]
+        //imgnew.onload = async () => {
+        //Update Texture
+     //   this.fishTexture = imgnew
+        await this.init();
+        this.ready = true
+        this.animate()
+    
+    }
 
-    },
+    //   },
 };
 </script>
 

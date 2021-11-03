@@ -1,5 +1,6 @@
 <template>
 <div class="" style="position: relative">
+
     <div id="container" style="">
         <img v-show="!fishObject || !ready" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
@@ -43,17 +44,34 @@ import {
 import fininfo from './fininfo.vue'
 import howto from './howto.vue'
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-
 export default {
     name: "ThreeTest",
     components: { fininfo, howto },
     props: ['resetCreator'],
     data() {
         return {
-            fishTexture: new Image(),
-            colors: [
-                require("@/assets/map1.jpg")
-            ],
+            fishTexture: {
+                image: new Image(),
+                finColor: ''
+            },
+            colors: {
+                default: {
+                    finColor: '',
+                    file: require("@/assets/map-default.jpg")
+                },
+                red: {
+                    finColor: '#970d51',
+                    file: require("@/assets/map-red.jpg")
+                },
+                green: {
+                    finColor: '#1f7321',
+                    file: require("@/assets/map-green.jpg")
+                },
+                blue: {
+                    finColor: '#282369',
+                    file: require("@/assets/map-blue.jpg")
+                }
+            },
             sideFin: '',
             modifier: '',
             bendSize: 0.4,
@@ -75,16 +93,13 @@ export default {
             visible: false,
             hidePlay: false,
             clock: new Three.Clock(),
-
             showFish: "fishObject",
             ready: false,
             fishObject: "",
             scene: "",
             fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
-
             backFin: "",
-
             topFin: "",
             swimSpeed: 3,
             sinking: false,
@@ -280,7 +295,7 @@ export default {
                 Object.assign(final, { score: this.score })
                 await this.$store.commit('ADD_FISH', final)
                 await this.$store.commit('SET_VIEW', 'attractor')
-              
+
                 localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
                 this.playing = false
                 this.$store.commit('SET_VIEW', 'final')
@@ -387,9 +402,15 @@ export default {
                 Object.keys(this.fins).forEach((y) => {
                     var name = "pos-" + element + "_fin-" + y;
                     var right = "pos-" + element + "_fin-" + y + '_right';
+
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
                         this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
+                        if (this.fishTexture.finColor !== 'default') {
+                            this.fishObject.getObjectByName(name).material.color.set(this.fishTexture.finColor)
+                            this.fishObject.getObjectByName(name).material.needsUpdate = true;
+                        }
+
                     } else {
                         console.log('missing: ' + name)
                     }
@@ -397,6 +418,10 @@ export default {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
                             this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
+                            if (this.fishTexture.finColor !== 'default') {
+                                this.fishObject.getObjectByName(right).material.color.set(this.fishTexture.finColor)
+                                this.fishObject.getObjectByName(right).material.needsUpdate = true;
+                            }
                         } else {
                             console.log('missing: ' + right)
                         }
@@ -413,7 +438,7 @@ export default {
             if (this.playing) {
 
                 this.modifier && this.modifier.apply();
-              
+
                 this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
                 this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
                 // side fin
@@ -421,10 +446,6 @@ export default {
                     this.fishObject.getObjectByName(this.sideFin).rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
                     this.fishObject.getObjectByName(this.sideFin + '_right').rotation.y = Math.sin(this.clock.getElapsedTime() * 6) * 0.600 * -0.750
                 }
-
-                // if (this.scene.getObjectByName('eyeWrapper')) {
-                //     this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
-                // }
 
                 if (this.fishObject.position.y > -18.5) {
                     if (this.score <= 2) {
@@ -448,22 +469,6 @@ export default {
                     }
                     // UP DOWN
 
-                } else {
-
-                    //    // alert(this.fishObject.rotation.y)
-                    //     if (this.fishObject.rotation.y > 1.56 && this.rotationDirection.y == '+') {
-                    //         this.fishObject.rotation.y += 0.01
-                    //     } 
-                    //     // else if (this.fishObject.rotation.y  1.56 && this.rotationDirection.y == '-') {
-                    //     //     this.fishObject.rotation.y -= 0.01
-                    //     // }
-                    //     if (this.fishObject.rotation.x < 5) {
-                    //         this.fishObject.rotation.x += 0.03
-                    //     }
-                    //     if (this.fishObject.rotation.x < 5) {
-                    //         this.fishObject.rotation.x += 0.03
-                    //     }
-                    //     console.log(this.fishObject.rotation.x)
                 }
             } else {
                 this.playing = false
@@ -474,7 +479,7 @@ export default {
                 this.$store.state.sounds.fail.pause()
                 this.$store.state.sounds.fail.currentTime = 0;
             }
-            if (this.fishObject && this.fishTexture.src) {
+            if (this.fishObject && this.ready) {
                 this.renderer.render(this.scene, this.camera);
             }
         },
@@ -514,13 +519,11 @@ export default {
             // Load object
             var gltf = await this.modelLoader()
             Three.Cache.enabled = true
-            
-            // gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture
-            // gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
+            if (this.fishTexture.image !== 'default') {
+                gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture.image
+                gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
+            }
             this.fishObject = gltf.scene;
-
-            var arr = ['0x3a911a', '0xad821c', '0x154d59']
-            this.fishColor = arr[Math.floor(Math.random() * arr.length)];
 
             //
             this.fishObject.getObjectByName('fish').name = 'newFish'
@@ -535,7 +538,6 @@ export default {
             this.modifier = new ModifierStack(this.fishObject.getObjectByName("newFish"));
             this.modifier.addModifier(this.bend);
 
-          
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
@@ -552,15 +554,26 @@ export default {
 
     mounted() {
         var imgnew = new Image()
-        imgnew.src = this.colors[0]
+
+        var arr = ['default', 'red', 'green', 'blue']
+        var color = arr[Math.floor(Math.random() * arr.length)];
+        var finColor = ''
+
+        finColor = this.colors[color].finColor
+        imgnew.src = this.colors[color].file
+
         imgnew.onload = async () => {
             //Update Texture
-            this.fishTexture = imgnew
+            this.fishTexture.image = imgnew
+            this.fishTexture.finColor = finColor
             await this.init();
             this.ready = true
             this.animate()
-            console.log(this.fishTexture)
         }
+
+        imgnew.onerror = function () {
+            alert("Error occurred while loading image");
+        };
 
     },
 };
