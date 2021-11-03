@@ -1,6 +1,6 @@
 <template>
 <div style="position: relative;">
-    <video muted autoplay loop :src="require('@/assets/slave.mp4')"></video>
+    <video muted :autoplay="playing" loop :src="require('@/assets/slave.mp4')"></video>
     <div id="containertank">
 
         <img v-show="!playing" class="loading" :src="require('@/assets/loader.svg')" />
@@ -21,6 +21,11 @@ export default {
     name: "ThreeTest",
     data() {
         return {
+            fishTexture: new Image(),
+            colors: [
+                require("@/assets/map1.jpg")
+            ],
+
             fishCounter: 0,
             mommyFish: null,
             modifier: [],
@@ -187,54 +192,55 @@ export default {
 
             const gltfData = await this.modelLoader()
             this.mommyFish = gltfData.scene
+            if (this.$store.state.fishes.length) {
+                this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
 
-            this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
+                    var fishObject = this.mommyFish.clone()
+                    this.allFish.push(fishObject);
+                    // if (i == 0) {
+                    //     const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
+                    //     const cube = new Three.Mesh(geometry);
+                    //     cube.material.opacity = 1;
+                    //     cube.material.transparent = false;
+                    //     cube.position.set(-360.000, 150.000, 16.660)
+                    //     cube.rotation.set(0, 0.045, 0)
+                    //     cube.scale.set(20.000, 20.000, 21.470)
+                    //     cube.add(fishObject.getObjectByName('eyes'))
+                    //     cube.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
+                    //     cube.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
+                    //     cube.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
+                    //     cube.name = 'eyeWrapper'
+                    //     cube.material.opacity = 0;
+                    //     cube.material.transparent = true;
+                    //     fishObject.add(cube);
+                    // }
 
-                var fishObject = this.mommyFish.clone()
-                this.allFish.push(fishObject);
-                if (i == 0) {
-                    const geometry = new Three.BoxBufferGeometry(15, 10, 0.420);
-                    const cube = new Three.Mesh(geometry);
-                    cube.material.opacity = 1;
-                    cube.material.transparent = false;
-                    cube.position.set(-360.000, 150.000, 16.660)
-                    cube.rotation.set(0, 0.045, 0)
-                    cube.scale.set(20.000, 20.000, 21.470)
-                    cube.add(fishObject.getObjectByName('eyes'))
-                    cube.getObjectByName('eyes').position.set(-4.860, -0.060, 1.600)
-                    cube.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
-                    cube.getObjectByName('eyes').scale.set(0.050, 0.050, 0.050)
-                    cube.name = 'eyeWrapper'
-                    cube.material.opacity = 0;
-                    cube.material.transparent = true;
-                    fishObject.add(cube);
-                }
+                    if (i != 0) {
+                        fishObject.scale.set(0.020, 0.020, 0.020)
+                        console.log(fishObject.position.x = Math.random() * (400 - 0) + 0);
+                        fishObject.position.y = Math.random() * (50 - -50) + -50;
+                        fishObject.position.z = Math.random() * (80 - -200) + -200;
+                    } else {
+                        fishObject.scale.set(0.030, 0.030, 0.030)
 
-                if (i != 0) {
-                    fishObject.scale.set(0.020, 0.020, 0.020)
-                    console.log(fishObject.position.x = Math.random() * (400 - 0) + 0);
-                    fishObject.position.y = Math.random() * (50 - -50) + -50;
-                    fishObject.position.z = Math.random() * (80 - -200) + -200;
-                } else {
-                    fishObject.scale.set(0.030, 0.030, 0.030)
+                        fishObject.position.z = 150
+                        fishObject.position.x = 400
 
-                    fishObject.position.z = 150
-                    fishObject.position.x = 400
+                    }
 
-                }
+                    Object.assign(fishObject, { movement: fish.movement });
+                    Object.assign(fishObject, { updown: fish.updown });
+                    Object.assign(fishObject, { score: fish.score });
+                    this.scene.add(fishObject)
+                    this.hideShowAllFins(i, fish)
 
-                Object.assign(fishObject, { movement: fish.movement });
-                Object.assign(fishObject, { updown: fish.updown });
-                Object.assign(fishObject, { score: fish.score });
-                this.scene.add(fishObject)
-                this.hideShowAllFins(i, fish)
+                });
 
-            });
-
-            this.allFish[0].getObjectByName('fish').name = 'bendyFish'
-            this.modifier = new ModifierStack(this.allFish[0].getObjectByName("bendyFish"));
-            this.modifier.addModifier(this.bend);
-            this.playing = true
+                this.allFish[0].getObjectByName('fish').name = 'bendyFish'
+                this.modifier = new ModifierStack(this.allFish[0].getObjectByName("bendyFish"));
+                this.modifier.addModifier(this.bend);
+                this.playing = true
+            }
 
             // RENDER
             if (containertank) {
@@ -246,11 +252,22 @@ export default {
                 containertank.appendChild(this.renderer.domElement);
 
             }
+            return true
         }
+
     },
     mounted() {
-        this.init();
-        this.animate();
+        var imgnew = new Image()
+        imgnew.src = this.colors[0]
+        imgnew.onload = async () => {
+            //Update Texture
+            this.fishTexture = imgnew
+            await this.init();
+            this.ready = true
+            this.animate()
+            console.log(this.fishTexture)
+        }
+
     },
 };
 </script>

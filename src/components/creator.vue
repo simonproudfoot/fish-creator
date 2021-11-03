@@ -1,12 +1,11 @@
 <template>
 <div class="" style="position: relative">
-
     <div id="container" style="">
         <img v-show="!fishObject || !ready" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
         <img v-if="!playing" class="close" :src="require('@/assets/home.svg')" @click="$store.commit('SET_VIEW', 'attractor')" />
-        <div v-if="!playing" class="howto button small aqua" @click="$store.commit('SET_HOWTO', true)">Help {{draggingFin}}</div>
+        <div v-if="!playing" class="howto button small aqua" @click="$store.commit('SET_HOWTO', true)">Help</div>
         <template v-if="!playing && draggingFin">
             <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
         </template>
@@ -52,6 +51,9 @@ export default {
     data() {
         return {
             fishTexture: new Image(),
+            colors: [
+                require("@/assets/map1.jpg")
+            ],
             sideFin: '',
             modifier: '',
             bendSize: 0.4,
@@ -80,9 +82,7 @@ export default {
             scene: "",
             fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/touchscreen_background.jpg"),
-            colors: [
-                require("@/assets/map1.jpg")
-            ],
+
             backFin: "",
 
             topFin: "",
@@ -157,9 +157,7 @@ export default {
         }
     },
     watch: {
-        ready(v) {
-            v ? this.animate() : null
-        },
+
         saving(val) {
             if (val) {
                 this.fishObject.visible = false
@@ -276,15 +274,13 @@ export default {
                         [key]: val
                     });
                 })
-                console.log(final)
+
                 Object.assign(final, { color: this.fishColor })
                 Object.assign(final, { movement: this.movement })
                 Object.assign(final, { score: this.score })
                 await this.$store.commit('ADD_FISH', final)
                 await this.$store.commit('SET_VIEW', 'attractor')
-                if (this.$store.state.fishes.length > 4) {
-                    this.$store.state.fishes.pop()
-                }
+              
                 localStorage.setItem("previous", JSON.stringify(this.$store.state.fishes));
                 this.playing = false
                 this.$store.commit('SET_VIEW', 'final')
@@ -417,11 +413,7 @@ export default {
             if (this.playing) {
 
                 this.modifier && this.modifier.apply();
-                if (this.scene.getObjectByName('eyeWrapper')) {
-                    this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.250 * 0.150
-                    this.scene.getObjectByName('eyes').position.z = Math.sin(this.clock.getElapsedTime() * 3) * 0.425 * 0.430
-                    this.scene.getObjectByName('eyes').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.360 * 0.360
-                }
+              
                 this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
                 this.fishObject.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
                 // side fin
@@ -521,10 +513,10 @@ export default {
             });
             // Load object
             var gltf = await this.modelLoader()
-         Three.Cache.enabled = true
-
-            gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture
-            gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
+            Three.Cache.enabled = true
+            
+            // gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture
+            // gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
             this.fishObject = gltf.scene;
 
             var arr = ['0x3a911a', '0xad821c', '0x154d59']
@@ -543,25 +535,7 @@ export default {
             this.modifier = new ModifierStack(this.fishObject.getObjectByName("newFish"));
             this.modifier.addModifier(this.bend);
 
-            const geometry = new Three.BoxBufferGeometry(80, 10, 5);
-
-            const cube = new Three.Mesh(geometry);
-            cube.material.opacity = 0;
-            cube.material.transparent = true;
-            cube.material.wireframe = false
-            cube.position.set(72.930, 150.000, 50.000)
-            cube.rotation.set(0, -0.180, 0)
-            cube.scale.set(20.000, 20.000, 13.140)
-            cube.name = 'eyeWrapper'
-
-            this.fishObject.getObjectByName('eyes').position.set(-27.200, 0.180, 1.010)
-            this.fishObject.getObjectByName('eyes').rotation.set(-0.070, -0.220, 0)
-            this.fishObject.getObjectByName('eyes').scale.set(0.050, 0.050, 0.100)
-
-            cube.add(this.fishObject.getObjectByName('eyes'))
-
-            this.fishObject.add(cube);
-
+          
             // RENDER
             this.renderer = new Three.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             this.renderer.setSize(container.clientWidth, container.clientHeight);
@@ -573,29 +547,8 @@ export default {
         },
     },
     beforeDestroy() {
-        this.scene.remove.apply(this.scene, this.scene.children);
+        //   this.scene.remove.apply(this.scene, this.scene.children);
     },
-
-    // var imgnew = new Image()
-    // imgnew.src = require("@/assets/map1.jpg")
-    // this.fishObject.getObjectByName('newFish').material.map.image.src = this.fishTexture.src
-
-    // console.log(this.fishObject.getObjectByName('newFish').material.map.image.src)
-
-    //this.fishObject.getObjectByName('fish').material.map.image.src = this.fishTexture.src
-    // async mounted() {
-    //     try {
-    //         await this.init()
-    //     } catch (error) {
-    //         console.log(error)
-    //     } finally {
-    //         this.ready = true
-    //         setTimeout(() => {
-    //              this.animate()
-    //         }, 2000);
-
-    //     }
-    // }
 
     mounted() {
         var imgnew = new Image()

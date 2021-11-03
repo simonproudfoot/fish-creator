@@ -195,6 +195,7 @@ export default {
 
 .endscreen {
     background-image: url('../assets/end.png');
+        background-color: #ddf3f5;
 }
 
 .infowindow__content {

@@ -1,7 +1,7 @@
 <template>
 <div id="app">
     <fishtank :key="tankRefresh"  v-if="!test"/>
-    <creator />
+    <creator v-if="$store.state.view == 'creator'" />
     <attractor v-show="$store.state.view == 'attractor'  && !test" />
     <final v-show="$store.state.view == 'final' && !test" />
 </div>
@@ -15,7 +15,7 @@ import final from "./components/final.vue";
 export default {
     data() {
         return {
-            test: true,
+            test: false,
             tankRefresh: 0,
             ready: false,
             startCreator: false
@@ -38,7 +38,6 @@ export default {
 
     },
     mounted() {
-
         var saved = JSON.parse(localStorage.getItem('previous'))
         if (saved) {
             saved.forEach((fish, i) => {
