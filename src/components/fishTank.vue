@@ -2,7 +2,8 @@
 <div style="position: relative;">
     <video autoplay muted loop :src="require('@/assets/slave.mp4')"></video>
     <div id="containertank">
-        <img v-show="!playing" class="loading" :src="require('@/assets/loader.svg')" />
+ 
+         <img v-show="!playing && $store.state.fishes.length" class="loading" :src="require('@/assets/loader.svg')" />
     </div>
 </div>
 </template>
