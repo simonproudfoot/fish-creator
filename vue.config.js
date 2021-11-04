@@ -2,6 +2,8 @@
 
 module.exports = {
     //publicPath: '/fish/',
+    //publicPath: '/yourapp/',
+    filenameHashing: false,
     configureWebpack: {
 
         module: {
