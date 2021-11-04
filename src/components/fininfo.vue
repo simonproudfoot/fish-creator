@@ -2,7 +2,7 @@
 <div class="infowindow">
     <div class="infowindow__content">
         <img class="close" :src="require('@/assets/button-close.svg')" @click="$store.commit('SET_FININFO', '')" />
-        <div style="width: 100%; style: 20px">i Fins</div>
+        
         <div class="infowindow__content__box">
             <div style="width: 100%; text-align: left; margin-bottom: 1em">
                 <img :src="require('@/assets/info-white.svg')" style="margin-right: 0.5em; vertical-align: middle; height: 30px; width: 30px;" /> Fin types
@@ -14,17 +14,19 @@
                 <div style="width: 50%">
                     <p style="margin-top: 0" v-if="content[$store.state.finInfo]" v-html="content[$store.state.finInfo]['content']"></p>
                 </div>
+               
             </div>
         </div>
 
+         <video v-if="$store.state.finInfo" autoplay loop muted :src="require('@/assets/video/'+$store.state.finInfo+'.mp4')"></video>
     </div>
+    
 </div>
 </template>
 
 <script>
 export default {
     props: ['fin'],
-
     data() {
         return {
             content: {
@@ -33,7 +35,6 @@ export default {
                 dorsal: {
 
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
-
                 },
                 anal: {
 
