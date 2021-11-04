@@ -1,7 +1,7 @@
 <template>
 <div class="infowindow">
     <div class="infowindow__content">
-        <img class="close" :src="require('@/assets/button-close.svg')" @click="$store.commit('SET_FININFO', '')"/>
+        <img class="close" :src="require('@/assets/button-close.svg')" @click="$store.commit('SET_FININFO', '')" />
         <div style="width: 100%; style: 20px">i Fins</div>
         <div class="infowindow__content__box">
             <div style="width: 100%; text-align: left; margin-bottom: 1em">
@@ -24,7 +24,7 @@
 <script>
 export default {
     props: ['fin'],
-   
+
     data() {
         return {
             content: {

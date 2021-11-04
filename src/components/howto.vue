@@ -8,10 +8,10 @@
             <div style="margin-top: 50px">
                 <p style="margin-top: 0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.</p>
             </div>
-
         </div>
-
+        <video autoplay loop muted :src="require('@/assets/video/howto.mp4')"></video>
     </div>
+
 </div>
 </template>
 
@@ -59,7 +59,6 @@ export default {
     }
 }
 </script>
-
 <style scoped>
 .infowindow {
     position: absolute;
@@ -68,6 +67,11 @@ export default {
     height: 1080px;
     background-color: #688790d6;
     z-index: 9999;
+}
+
+.infowindow video {
+    width: 100%;
+    height: auto;
 }
 
 .infowindow__content {
