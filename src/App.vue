@@ -31,7 +31,7 @@ export default {
     },
     watch: {
         '$store.state.fishes'(val) {
-            this.tankRefresh++
+         //   this.tankRefresh++
         },
         '$store.state.reset'(val) {
             this.tankRefresh++
@@ -42,9 +42,7 @@ export default {
         var saved = JSON.parse(localStorage.getItem('previous'))
         if (saved) {
             saved.forEach((fish, i) => {
-                if (i < 5) {
-                    this.$store.commit('ADD_FISH', fish)
-                }
+                this.$store.commit('ADD_FISH', fish)
             });
         }
     }

@@ -26,35 +26,7 @@ function init() {
     this.scene.fog = new Three.Fog(color, near, far);
     //  this.scene.background = new Three.Color(color);
 
-    var loader = new Three.TextureLoader();
-    var sections = 6
-    var texture = loader.load(this.backgroundImage, function (texture) {
-        texture.wrapS = texture.wrapT = Three.RepeatWrapping;
-        texture.offset.set(0, 0);
-        texture.repeat.set(sections, 1);
-    });
-
-    var material = new Three.MeshPhongMaterial({
-        color: 0xffffff,
-        specular: 0x111111,
-
-        fog: false,
-        shininess: 10,
-        map: texture,
-
-    });
-    // height . width
-    var geometry = new Three.PlaneGeometry(90 * sections, 40);
-
-    this.background = new Three.Mesh(geometry, material);
-    var offset = sections * 90 * 2
-    //   mesh.position.x = offset
-    this.background.rotation.y = -0
-
-    this.background.position.z = -30
-    this.background.scale.y = 2.16
-    this.background.scale.x = 2
-    this.scene.add(this.background);
+   
 
     // Load object
     const gltfLoader = new GLTFLoader();

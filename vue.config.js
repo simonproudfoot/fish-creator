@@ -1,7 +1,7 @@
 // vue.config.js
 
 module.exports = {
-    //publicPath: '/fish/',
+    publicPath: process.env.NODE_ENV === 'production' ? '/fish' : '/',
     //publicPath: '/yourapp/',
     filenameHashing: false,
     configureWebpack: {

@@ -1,6 +1,7 @@
 <template>
 <div class="endscreen">
     <div class="endscreen_back"></div>
+    <div class="sea"></div>
     <div class="button green reset shadowed" @click="$store.commit('SET_VIEW', 'attractor')">Start again</div>
     <img :src="require('@/assets/boat.svg')" class="boat" />
     <span class="boatQuote">
@@ -27,16 +28,16 @@
                 <div class="flex">
                     <div style="width: 50%">
                         <h1 class="my-0" style="text-transform: capitalize">{{species[selected].name}}</h1>
-                        
+
                     </div>
                     <div style="width: 50%">
                         <p style="margin-top: 0" v-html="species[selected].content"></p>
                     </div>
                 </div>
-           
+
             </div>
 
-              <video autoplay loop muted :src="require('@/assets/video/'+species[selected].vid)"></video> 
+            <video autoplay loop muted :src="require('@/assets/video/'+species[selected].vid)"></video>
             <!-- <img class="fish_large" :src="require('@/assets/'+species[selected].img)" /> -->
         </div>
     </div>
@@ -94,6 +95,9 @@ export default {
 </script>
 
 <style scoped>
+.button{
+    z-index: 1000;
+}
 .reset {
     position: absolute;
     top: 77px;
@@ -138,6 +142,7 @@ export default {
     height: 80px;
     top: 20px;
     right: 20px;
+    z-index: 100;
 }
 
 .flex {
@@ -199,13 +204,10 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: -2;
 }
 
-.endscreen {
-    background-image: url('../assets/end.png');
-    background-color: #ddf3f5;
-}
+.endscreen {}
 
 .infowindow__content {
     background-image: url('../assets/touchscreen_background.jpg');
@@ -223,6 +225,7 @@ export default {
     position: absolute;
     width: 284px;
     height: 400px;
+        z-index: 100;
 }
 
 .fish_image {
@@ -246,12 +249,14 @@ export default {
     height: 67px;
     bottom: 30px;
     left: -46px;
+
     transform: rotate(90deg);
 }
 
 .boatQuote {
     position: absolute;
     left: 650px;
+    z-index: 100;
     width: 510px;
     top: 100px;
     height: 275px;
@@ -289,10 +294,21 @@ export default {
     margin: 0;
 }
 
+.sea {
+    background-image: url('../assets/end.png');
+
+    z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
 .boat {
     position: absolute;
     top: 90px;
-    z-index: -1;
+    z-index: 0;
     left: 147px;
     width: 512px;
     height: 376px;

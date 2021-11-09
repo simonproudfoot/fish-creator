@@ -2,9 +2,10 @@
 <div style="position: relative;">
     <video autoplay muted loop :src="require('@/assets/slave.mp4')"></video>
     <div id="containertank">
- 
-         <img v-show="!playing && $store.state.fishes.length" class="loading" :src="require('@/assets/loader.svg')" />
+
+        <img v-show="!playing && $store.state.fishes.length" class="loading" :src="require('@/assets/loader.svg')" />
     </div>
+
 </div>
 </template>
 
@@ -14,20 +15,22 @@ import animate from '../functions/animatetank.js'
 import {
     ModifierStack,
     Bend,
-
 } from "three.modifiers";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 export default {
     name: "ThreeTest",
     data() {
         return {
-
+            copyMaterial: null,
+            colors: ['red', 'green', 'blue', 'default'],
+            images: [],
             fishCounter: 0,
             mommyFish: null,
             modifier: [],
             bendSize: 0.4,
             bend: new Bend(0.1, 0.7, 0),
             allFish: [],
+            allTextures: [],
             gui: false,
             fishScale: 0.3,
             playing: false,
@@ -55,6 +58,7 @@ export default {
             showFish: "fishObject",
             ready: false,
             fishObject: "",
+
             scene: "",
             fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/underwater.jpg"),
@@ -89,7 +93,7 @@ export default {
         score() {
             var correct = 0
             Object.entries(this.fins).forEach((x) => {
-                console.log(x[0] == x[1].selected)
+
                 x[0] == x[1].selected ? correct++ : null
             })
             return correct
@@ -101,14 +105,6 @@ export default {
         },
     },
     methods: {
-        flipit() {
-            var newFin = this.fishObject
-                .getObjectByName("pos-pectoral_fin-tail")
-                .clone();
-            newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
-            this.fishObject.add(newFin);
-        },
-        // movement functions
 
         convertDecimal(num, double) {
             let decimal = !double ? "0.0" + num : "0.00" + num;
@@ -128,21 +124,19 @@ export default {
                 }
             });
         },
-        hideShowAllFins(fishIndex, finsSelected, color) {
+
+        hideShowAllFins(fishIndex, finsSelected) {
             Object.keys(this.fins).forEach((element) => {
                 Object.keys(this.fins).forEach((y) => {
                     var name = "pos-" + element + "_fin-" + y;
                     if (this.allFish[fishIndex].getObjectByName(name)) {
                         this.allFish[fishIndex].getObjectByName(name).visible = false;
                         this.allFish[fishIndex].getObjectByName(name).material.side = Three.DoubleSide
-                        this.allFish[fishIndex].getObjectByName(name).material.color.set(color)
-                        this.allFish[fishIndex].getObjectByName(name).material.needsUpdate = true;
                     }
                     if (this.allFish[fishIndex].getObjectByName(name + '_right')) {
                         this.allFish[fishIndex].getObjectByName(name + '_right').visible = false;
                         this.allFish[fishIndex].getObjectByName(name + '_right').material.side = Three.DoubleSide
-                        this.allFish[fishIndex].getObjectByName(name + '_right').material.color.set(color)
-                        this.allFish[fishIndex].getObjectByName(name + '_right').material.needsUpdate = true;
+
                     }
                 });
             });
@@ -157,17 +151,7 @@ export default {
             })
         },
         animate,
-
-        // loadSkins(model) {
-        //     const textureloader = new Three.TextureLoader();
-        //     const imagea = require("@/assets/map-red.jpg")
-        //     return new Promise((resolve, reject) => {
-        //         textureloader.load(imagea, (texture) => {
-        //             imagea, data => resolve(data), null, reject
-        //         });
-        //     });
-        // },
-
+      
         async modelLoader(url) {
             const loader = new GLTFLoader();
             return new Promise((resolve, reject) => {
@@ -199,19 +183,43 @@ export default {
             const far = 800;
             const color = '#2a8f99';
             this.scene.fog = new Three.Fog(color, near, far);
-
             const gltfData = await this.modelLoader()
-
             this.mommyFish = gltfData.scene
+
             if (this.$store.state.fishes.length) {
                 this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
-
+                    var copyMaterial = this.mommyFish.getObjectByName('fish').material.clone()
                     var fishObject = this.mommyFish.clone()
-                    this.allFish.push(fishObject);
+                    const loader = new Three.TextureLoader();
+                    var color = ''                    
+                    if(fish.color == 'red'){
+                       color = require("@/assets/map-red.jpg")
+                    }
+                    if(fish.color == 'green'){
+                       color = require("@/assets/map-green.jpg")
+                    }
+                     if(fish.color == 'blue'){
+                       color = require("@/assets/map-blue.jpg")
+                    }
+                    const material = new Three.MeshBasicMaterial({
+                        map: loader.load(color)
+                    });
+                 
+                    fishObject.getObjectByName('fish').material = material
+                    fishObject.getObjectByName('fish').material.map.repeat = copyMaterial.map.repeat
+                    fishObject.getObjectByName('fish').material.map.anisotropy = copyMaterial.map.anisotropy
+                    fishObject.getObjectByName('fish').material.map.encoding = copyMaterial.map.encoding
+                    fishObject.getObjectByName('fish').material.map.flipY = copyMaterial.map.flipY
+                    fishObject.getObjectByName('fish').material.map.format = copyMaterial.map.format
+
+                    Object.assign(fishObject.userData, { movement: fish.movement });
+                    Object.assign(fishObject.userData, { updown: fish.updown });
+                    Object.assign(fishObject.userData, { score: fish.score });
+                    Object.assign(fishObject.userData, { color: fish.color });
 
                     if (i != 0) {
                         fishObject.scale.set(0.020, 0.020, 0.020)
-                        console.log(fishObject.position.x = Math.random() * (400 - 0) + 0);
+                        fishObject.position.x = Math.random() * (400 - 0) + 0;
                         fishObject.position.y = Math.random() * (50 - -50) + -50;
                         fishObject.position.z = Math.random() * (80 - -200) + -200;
                     } else {
@@ -219,22 +227,15 @@ export default {
                         fishObject.position.z = 150
                         fishObject.position.x = 400
                     }
-
-                    Object.assign(fishObject, { movement: fish.movement });
-                    Object.assign(fishObject, { updown: fish.updown });
-                    Object.assign(fishObject, { score: fish.score });
-                    Object.assign(fishObject, { color: fish.color });
-                    Object.assign(fishObject, { finColor: fish.finColor });
-                    console.log(fish)
+                    this.allFish.push(fishObject);
                     this.scene.add(fishObject)
-                    this.hideShowAllFins(i, fish, fish.finColor)
+                    this.hideShowAllFins(i, fish)
 
                 });
 
-                this.allFish[0].getObjectByName('fish').name = 'bendyFish'
-                this.modifier = new ModifierStack(this.allFish[0].getObjectByName("bendyFish"));
+                this.modifier = new ModifierStack(this.scene.getObjectByName("fish"));
                 this.modifier.addModifier(this.bend);
-                this.playing = true
+
             }
 
             // RENDER
@@ -244,48 +245,51 @@ export default {
                 this.renderer.outputEncoding = Three.sRGBEncoding;
                 this.renderer.setClearColor(0x000000, 0); // the default
                 containertank.appendChild(this.renderer.domElement);
-
             }
-            return true
+
+            this.playing = true
+            this.ready = true
+
         },
         async TextureLoader(color) {
-            if (!color) {
-                color = 'default'
-            }
             var image = require("@/assets/map-" + color + ".jpg")
+            console.log(image)
             const loader = new Three.TextureLoader();
             return new Promise((resolve, reject) => {
                 loader.load(image, data => resolve(data), null, reject);
             });
         },
-        async applyAllTextures(model) {
-            for (const fish of this.allFish) {
-                var skin = await this.TextureLoader(fish.color)
-                if (fish.getObjectByName('bendyFish')) {
-                    fish.getObjectByName('bendyFish').material.map.image = skin.image
-                    fish.getObjectByName('bendyFish').material.map.needsUpdate = true;
-                } else {
-                    fish.getObjectByName('fish').material.map.image = skin.image
-                    fish.getObjectByName('fish').material.map.needsUpdate = true;
-                }
-            }
-        }
 
     },
-    async mounted() {
-        try {
-            await this.init();
-        } catch (error) {
-            console.log(error)
-        } finally {
-            this.ready = true
-            this.applyAllTextures()
-            this.animate()
+    mounted() {
+        var images = [new Image(), new Image(), new Image(), new Image()]
+        images[0].src = require("@/assets/map-red.jpg")
+        images[1].src = require("@/assets/map-green.jpg")
+        images[2].src = require("@/assets/map-blue.jpg")
+        images[3].src = require("@/assets/map-default.jpg")
+
+        function imageIsLoaded(images) {
+            return new Promise(resolve => {
+                images.onload = () => resolve()
+                images.onerror = () => resolve()
+
+            })
         }
+        Promise.all(images.map(imageIsLoaded)).then(() => {
+            this.images = images
+            this.init()
+            this.animate()
+
+        })
+        setTimeout(() => {
+            // console.log(this.allTextures[0].map.image = this.images[1])
+            //this.allTextures[0].map.image.needsUpdate = true;
+
+            //gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture.image
+
+        }, 5000);
 
     }
-
-    //   },
 };
 </script>
 

@@ -1,6 +1,7 @@
 <template>
 <div class="" style="position: relative">
     <div id="container" style="">
+
         <img v-show="!fishObject || !ready" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
@@ -24,7 +25,7 @@
             </footer>
             <footer class="footer--playing" v-if="playing">
                 <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Try a different fin selection</div>
-                <div class="button green" v-if="score >=2 && !saving" @click="save">Swim!</div>
+                <div class="button green" v-if="score >2 && !saving" @click="save">Swim!</div>
             </footer>
         </transition>
     </div>
@@ -149,7 +150,7 @@ export default {
         score() {
             var correct = 0
             Object.entries(this.fins).forEach((x) => {
-                console.log(x[0] == x[1].selected)
+
                 x[0] == x[1].selected ? correct++ : null
             })
             return correct
@@ -185,13 +186,15 @@ export default {
         },
         playing(x) {
             if (x) {
+
                 //playSound('fss')
                 if (this.score > 2) {
+
                     this.$store.state.sounds.test.loop = true
                     this.$store.state.sounds.test.play()
-
                 } else {
                     this.$store.state.sounds.fail.loop = false
+
                     this.$store.state.sounds.fail.play()
 
                     setTimeout(() => {
@@ -272,11 +275,9 @@ export default {
                     Object.assign(final, {
                         [key]: val
                     });
-                })  
-                
+                })
                 Object.assign(final, { color: this.colorSected })
                 Object.assign(final, { finColor: this.fishTexture.finColor })
-       
                 Object.assign(final, { movement: this.movement })
                 Object.assign(final, { score: this.score })
                 await this.$store.commit('ADD_FISH', final)
@@ -392,10 +393,10 @@ export default {
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
                         this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
-                        if (this.fishTexture.finColor !== 'default') {
-                            this.fishObject.getObjectByName(name).material.color.set(this.fishTexture.finColor)
-                            this.fishObject.getObjectByName(name).material.needsUpdate = true;
-                        }
+                        // if (this.fishTexture.finColor !== 'default') {
+                        //     this.fishObject.getObjectByName(name).material.color.set(this.fishTexture.finColor)
+                        //     this.fishObject.getObjectByName(name).material.needsUpdate = true;
+                        // }
 
                     } else {
                         console.log('missing: ' + name)
@@ -404,10 +405,10 @@ export default {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
                             this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
-                            if (this.fishTexture.finColor !== 'default') {
-                                this.fishObject.getObjectByName(right).material.color.set(this.fishTexture.finColor)
-                                this.fishObject.getObjectByName(right).material.needsUpdate = true;
-                            }
+                            // if (this.fishTexture.finColor !== 'default') {
+                            //     this.fishObject.getObjectByName(right).material.color.set(this.fishTexture.finColor)
+                            //     this.fishObject.getObjectByName(right).material.needsUpdate = true;
+                            // }
                         } else {
                             console.log('missing: ' + right)
                         }
@@ -539,8 +540,8 @@ export default {
     },
 
     mounted() {
+        Three.Cache.enabled = true
         var imgnew = new Image()
-
         var arr = ['default', 'red', 'green', 'blue']
         var color = arr[Math.floor(Math.random() * arr.length)];
         var finColor = ''
@@ -726,12 +727,12 @@ export default {
 
 .finDrop.dorsal {
     top: 130px;
-    right: 950px;
+    right: 920px;
 }
 
 .finDrop.pectoral {
-    top: 350px;
-    left: 674px;
+    top: 300px;
+    left: 850px;
 }
 
 .finDrop.tail {
@@ -741,17 +742,17 @@ export default {
 
 .finDrop.anal {
     top: 372px;
-    right: 700px;
+    right: 600px;
 }
 
 .finDrop.body {
     top: 195px;
-    right: 679px;
+    right: 600px;
 }
 
 .finDrop.pelvic {
     top: 425px;
-    left: 880px;
+    left: 800px;
     z-index: 0;
 }
 
@@ -836,7 +837,7 @@ h3 img {
 }
 
 .close {
-
+    z-index: 1000;
     position: absolute;
     width: 80px;
     height: 80px;
