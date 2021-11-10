@@ -28,17 +28,13 @@
                 <div class="flex">
                     <div style="width: 50%">
                         <h1 class="my-0" style="text-transform: capitalize">{{species[selected].name}}</h1>
-
                     </div>
                     <div style="width: 50%">
                         <p style="margin-top: 0" v-html="species[selected].content"></p>
                     </div>
                 </div>
-
             </div>
-
-            <video autoplay loop muted :src="require('@/assets/video/'+species[selected].vid)"></video>
-            <!-- <img class="fish_large" :src="require('@/assets/'+species[selected].img)" /> -->
+            <img :src="require('@/assets/gifs/'+species[selected].vid)" style="z-index: 1; position: relative;">
         </div>
     </div>
 </div>
@@ -59,7 +55,7 @@ export default {
             species: [{
                     name: 'Atlantic Mackerel',
                     img: 'mackerel.svg',
-                    vid: 'mackeral.mp4',
+                    vid: 'mackeral.gif',
                     top: 587,
                     left: 101,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -67,7 +63,7 @@ export default {
                 {
                     name: 'Sea Bass',
                     img: 'bass.svg',
-                    vid: 'bass.mp4',
+                    vid: 'bass.gif',
                     top: 772,
                     left: 545,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -75,7 +71,7 @@ export default {
                 {
                     name: 'Red Gurnard',
                     img: 'gurnard.svg',
-                    vid: 'gurnard.mp4',
+                    vid: 'gurnard.gif',
                     top: 568,
                     left: 920,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -83,7 +79,7 @@ export default {
                 {
                     name: 'European Plaice',
                     img: 'plaice.svg',
-                    vid: 'plaice.mp4',
+                    vid: 'plaice.gif',
                     top: 688,
                     left: 1395,
                     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.'
@@ -95,9 +91,10 @@ export default {
 </script>
 
 <style scoped>
-.button{
+.button {
     z-index: 1000;
 }
+
 .reset {
     position: absolute;
     top: 77px;
@@ -225,7 +222,7 @@ export default {
     position: absolute;
     width: 284px;
     height: 400px;
-        z-index: 100;
+    z-index: 100;
 }
 
 .fish_image {

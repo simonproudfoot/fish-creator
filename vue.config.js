@@ -5,7 +5,6 @@ module.exports = {
     //publicPath: '/yourapp/',
     filenameHashing: false,
     configureWebpack: {
-
         module: {
             rules: [
                 {

@@ -470,7 +470,6 @@ export default {
                 this.renderer.render(this.scene, this.camera);
             }
         },
-
         modelLoader(url) {
             const loader = new GLTFLoader();
             return new Promise((resolve, reject) => {
@@ -506,13 +505,17 @@ export default {
             // Load object
             var gltf = await this.modelLoader()
             Three.Cache.enabled = true
-            if (this.fishTexture.image !== 'default') {
-                gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture.image
-                gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
-            }
-            this.fishObject = gltf.scene;
+            var colors = ['#fcba03', '#8ffdff', '#c375ff', '#73fdff']
+            var color = colors[Math.floor(Math.random() * colors.length)];
 
-            //
+            gltf.scene.getObjectByName('fish').material.color.setHex(parseInt(color.substr(1), 16));
+            this.colorSected = color
+            // if (this.fishTexture.image !== 'default') {
+            //     gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture.image
+            //     gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
+            // }
+
+            this.fishObject = gltf.scene;
             this.fishObject.getObjectByName('fish').name = 'newFish'
             this.fishObject.castShadow = false; //default is false
             this.fishObject.receiveShadow = false; //default
@@ -539,30 +542,32 @@ export default {
         //   this.scene.remove.apply(this.scene, this.scene.children);
     },
 
-    mounted() {
+    async mounted() {
         Three.Cache.enabled = true
-        var imgnew = new Image()
-        var arr = ['default', 'red', 'green', 'blue']
-        var color = arr[Math.floor(Math.random() * arr.length)];
-        var finColor = ''
-        this.colorSected = color
+        // var imgnew = new Image()
+        // var arr = ['default', 'red', 'green', 'blue']
+        // var color = arr[Math.floor(Math.random() * arr.length)];
+        // var finColor = ''
+        // this.colorSected = color
 
-        finColor = this.$store.state.colors[color].finColor
-        imgnew.src = this.$store.state.colors[color].file
+        // finColor = this.$store.state.colors[color].finColor
+        // imgnew.src = this.$store.state.colors[color].file
 
-        imgnew.onload = async () => {
-            //Update Texture
-            this.fishTexture.image = imgnew
-            this.fishTexture.finColor = finColor
-            await this.init();
-            this.ready = true
-            this.animate()
-        }
+        // imgnew.onload = async () => {
+        //     //Update Texture
+        //     this.fishTexture.image = imgnew
+        //     this.fishTexture.finColor = finColor
+        //     await this.init();
+        //     this.ready = true
+        //     this.animate()
+        // }
 
-        imgnew.onerror = function () {
-            alert("Error occurred while loading image");
-        };
-
+        // imgnew.onerror = function () {
+        //     alert("Error occurred while loading image");
+        // };
+        await this.init();
+        this.ready = true
+        this.animate()
     },
 };
 </script>

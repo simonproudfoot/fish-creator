@@ -12,24 +12,6 @@ const store = new Vuex.Store({
     fishes: [],
     howto: false,
     reset: 0,
-    colors: {
-      default: {
-        finColor: '',
-        file: require("@/assets/map-default.jpg")
-      },
-      red: {
-        finColor: '#970d51',
-        file: require("@/assets/map-red.jpg")
-      },
-      green: {
-        finColor: '#1f7321',
-        file: require("@/assets/map-green.jpg")
-      },
-      blue: {
-        finColor: '#282369',
-        file: require("@/assets/map-blue.jpg")
-      }
-    },
     sounds: {
       swim: new Audio(require("@/assets/sound/swim.wav")),
       test: new Audio(require("@/assets/sound/test.mp3")),
@@ -42,7 +24,7 @@ const store = new Vuex.Store({
       state.reset++
     },
     ADD_FISH(state, val) {
-      state.fishes.length = Math.min(state.fishes.length, 4);
+      state.fishes.length = Math.min(state.fishes.length, 3);
       state.fishes.push(val)
     },
     SET_VIEW(state, val) {

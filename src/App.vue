@@ -1,9 +1,9 @@
 <template>
 <div id="app">
-    <fishtank :key="tankRefresh" />
+    <fishtank :key="reset" />
     <creator v-if="$store.state.view == 'creator'" />
-    <attractor v-show="$store.state.view == 'attractor'" />
-    <final v-show="$store.state.view == 'final'" />
+    <attractor v-if="$store.state.view == 'attractor'" />
+    <final v-if="$store.state.view == 'final'" />
 </div>
 </template>
 
@@ -17,6 +17,7 @@ export default {
     data() {
         return {
             test: true,
+            reset: 0,
             tankRefresh: 0,
             ready: false,
             startCreator: false
@@ -31,7 +32,10 @@ export default {
     },
     watch: {
         '$store.state.fishes'(val) {
-         //   this.tankRefresh++
+            this.tankRefresh++
+            if (this.tankRefresh > 0) {
+                this.reset++
+            }
         },
         '$store.state.reset'(val) {
             this.tankRefresh++

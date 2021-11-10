@@ -2,9 +2,13 @@ function animate() {
 
     let speed = 1
     let move = true
-    setTimeout(() => {
+
+
+
     requestAnimationFrame(this.animate);
-    }, 1000 / 30);
+
+
+
     if (this.playing) {
         if (this.camera.position.x > 0) { // 0{
             this.camera.position.x -= 0.05
@@ -12,23 +16,20 @@ function animate() {
             this.camera.position.x = 0
         }
         this.allFish.forEach((selectedFish, i) => {
-       
+
+
+            this.modifier && this.modifier.apply();
             this.bend._force = Math.sin(this.clock.getElapsedTime() * 3) * -0.5 * 0.5 // BEND 
+
+
+
             selectedFish.getObjectByName('back-fins').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.600 * -0.750
-            // side fin
-            if (selectedFish.getObjectByName('fish'+i)) {
-                this.modifier && this.modifier.apply();
-            }
-            if (this.scene.getObjectByName('eyeWrapper')) {
-                this.scene.getObjectByName('eyeWrapper').rotation.y = Math.sin(this.clock.getElapsedTime() * 3) * 0.450 * 0.300
-            }
-            //    }
-            // selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.userData.movement.updown / 8
-            // up down
+
+
             if (selectedFish.score > 5) {
                 selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * 1
             } else {
-                selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.userData.movement.updown / 2
+                selectedFish.position.y = Math.sin(this.clock.getElapsedTime()) * selectedFish.userData.movement.updown /2
             }
             // // WINDING
             if (selectedFish.userData.movement.smimWind <= 7) {
@@ -54,7 +55,7 @@ function animate() {
             }
         })
     }
-    if(this.mommyFish){
+    if (this.mommyFish) {
         this.renderer.render(this.scene, this.camera);
     }
 }

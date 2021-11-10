@@ -2,10 +2,8 @@
 <div style="position: relative;">
     <video autoplay muted loop :src="require('@/assets/slave.mp4')"></video>
     <div id="containertank">
-
         <img v-show="!playing && $store.state.fishes.length" class="loading" :src="require('@/assets/loader.svg')" />
     </div>
-
 </div>
 </template>
 
@@ -54,11 +52,9 @@ export default {
             visible: false,
             hidePlay: false,
             clock: new Three.Clock(),
-
             showFish: "fishObject",
             ready: false,
             fishObject: "",
-
             scene: "",
             fishObjectUlr: require("@/assets/fish_rigged.gltf"),
             backgroundImage: require("@/assets/underwater.jpg"),
@@ -151,7 +147,6 @@ export default {
             })
         },
         animate,
-      
         async modelLoader(url) {
             const loader = new GLTFLoader();
             return new Promise((resolve, reject) => {
@@ -185,37 +180,46 @@ export default {
             this.scene.fog = new Three.Fog(color, near, far);
             const gltfData = await this.modelLoader()
             this.mommyFish = gltfData.scene
+            // const loader = new Three.TextureLoader();
+            // const materialRed = new Three.MeshBasicMaterial({
+            //     map: loader.load(require("@/assets/map-red.jpg"))
+            // });
+            // const materialGreen = new Three.MeshBasicMaterial({
+            //     map: loader.load(require("@/assets/map-green.jpg"))
+            // });
+            // const materialBlue = new Three.MeshBasicMaterial({
+            //     map: loader.load(require("@/assets/map-blue.jpg"))
+            // });
 
             if (this.$store.state.fishes.length) {
                 this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
                     var copyMaterial = this.mommyFish.getObjectByName('fish').material.clone()
+                    copyMaterial.color.setHex(parseInt(fish.color.substr(1), 16))
+
                     var fishObject = this.mommyFish.clone()
-                    const loader = new Three.TextureLoader();
-                    var color = ''                    
-                    if(fish.color == 'red'){
-                       color = require("@/assets/map-red.jpg")
-                    }
-                    if(fish.color == 'green'){
-                       color = require("@/assets/map-green.jpg")
-                    }
-                     if(fish.color == 'blue'){
-                       color = require("@/assets/map-blue.jpg")
-                    }
-                    const material = new Three.MeshBasicMaterial({
-                        map: loader.load(color)
-                    });
-                 
-                    fishObject.getObjectByName('fish').material = material
-                    fishObject.getObjectByName('fish').material.map.repeat = copyMaterial.map.repeat
-                    fishObject.getObjectByName('fish').material.map.anisotropy = copyMaterial.map.anisotropy
-                    fishObject.getObjectByName('fish').material.map.encoding = copyMaterial.map.encoding
-                    fishObject.getObjectByName('fish').material.map.flipY = copyMaterial.map.flipY
-                    fishObject.getObjectByName('fish').material.map.format = copyMaterial.map.format
+
+                    console.log('color:' + fish.color) 
+                    fishObject.getObjectByName('fish').material = copyMaterial
+                    // if (fish.color == 'green') {
+                    //     fishObject.getObjectByName('fish').material = materialGreen
+                    // }
+                    // if (fish.color == 'red') {
+                    //     fishObject.getObjectByName('fish').material = materialRed
+                    // }
+                    // if (fish.color == 'blue') {
+                    //     fishObject.getObjectByName('fish').material = materialBlue
+                    // }
+                    // if (fish.color != 'default') {
+                    //     fishObject.getObjectByName('fish').material.map.encoding = 3001
+                    //     fishObject.getObjectByName('fish').material.map.flipY = false
+                    // }
 
                     Object.assign(fishObject.userData, { movement: fish.movement });
                     Object.assign(fishObject.userData, { updown: fish.updown });
                     Object.assign(fishObject.userData, { score: fish.score });
                     Object.assign(fishObject.userData, { color: fish.color });
+
+                    //fishObject.getObjectByName('fish').position.z 
 
                     if (i != 0) {
                         fishObject.scale.set(0.020, 0.020, 0.020)
@@ -233,10 +237,14 @@ export default {
 
                 });
 
-                this.modifier = new ModifierStack(this.scene.getObjectByName("fish"));
-                this.modifier.addModifier(this.bend);
-
             }
+
+            this.allFish[0].name = 'mainFish'
+            var mainBody = this.scene.getObjectByName('mainFish').children[3]
+            this.modifier = new ModifierStack(mainBody);
+            this.modifier.addModifier(this.bend);
+
+            console.log('count:' + this.allFish.length)
 
             // RENDER
             if (containertank) {
@@ -247,48 +255,15 @@ export default {
                 containertank.appendChild(this.renderer.domElement);
             }
 
-            this.playing = true
-            this.ready = true
+            return true
 
         },
-        async TextureLoader(color) {
-            var image = require("@/assets/map-" + color + ".jpg")
-            console.log(image)
-            const loader = new Three.TextureLoader();
-            return new Promise((resolve, reject) => {
-                loader.load(image, data => resolve(data), null, reject);
-            });
-        },
-
     },
-    mounted() {
-        var images = [new Image(), new Image(), new Image(), new Image()]
-        images[0].src = require("@/assets/map-red.jpg")
-        images[1].src = require("@/assets/map-green.jpg")
-        images[2].src = require("@/assets/map-blue.jpg")
-        images[3].src = require("@/assets/map-default.jpg")
-
-        function imageIsLoaded(images) {
-            return new Promise(resolve => {
-                images.onload = () => resolve()
-                images.onerror = () => resolve()
-
-            })
-        }
-        Promise.all(images.map(imageIsLoaded)).then(() => {
-            this.images = images
-            this.init()
-            this.animate()
-
-        })
-        setTimeout(() => {
-            // console.log(this.allTextures[0].map.image = this.images[1])
-            //this.allTextures[0].map.image.needsUpdate = true;
-
-            //gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture.image
-
-        }, 5000);
-
+    async mounted() {
+        await this.init()
+        this.playing = true
+        this.ready = true
+        this.animate()
     }
 };
 </script>
