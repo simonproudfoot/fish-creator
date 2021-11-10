@@ -24,7 +24,7 @@
                 <div class="button green test" @click="playing = !playing" :class="hidePlay ? 'inactive' : null">Test!</div>
             </footer>
             <footer class="footer--playing" v-if="playing">
-                <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Try a different fin selection</div>
+                <div class="button orange" v-if="!saving" @click="playing = false, hideAllFins()">Choose different fins</div>
                 <div class="button green" v-if="score >2 && !saving" @click="save">Swim!</div>
             </footer>
         </transition>
