@@ -9,7 +9,7 @@
                 <p style="margin-top: 0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas efficitur magna at odio maximus ultricies.</p>
             </div>
         </div>
-        <video autoplay loop muted :src="require('@/assets/video/howto.mp4')"></video>
+        <img :src="require('@/assets/howto.gif')">
     </div>
 
 </div>
@@ -58,6 +58,7 @@ export default {
     }
 }
 </script>
+
 <style scoped>
 .infowindow {
     position: absolute;
@@ -66,6 +67,7 @@ export default {
     height: 1080px;
     background-color: #688790d6;
     z-index: 9999;
+
 }
 
 .infowindow video {
@@ -80,6 +82,7 @@ export default {
     left: 227px;
     width: 1512px;
     height: 826px;
+    background-image: url('../assets/touchscreen_background.jpg');
 }
 
 .infowindow__content__box {
@@ -98,7 +101,7 @@ export default {
 }
 
 .close {
-z-index: 1000;
+    z-index: 1000;
     position: absolute;
     width: 80px;
     height: 80px;
