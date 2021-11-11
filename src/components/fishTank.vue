@@ -180,46 +180,31 @@ export default {
             this.scene.fog = new Three.Fog(color, near, far);
             const gltfData = await this.modelLoader()
             this.mommyFish = gltfData.scene
-            // const loader = new Three.TextureLoader();
-            // const materialRed = new Three.MeshBasicMaterial({
-            //     map: loader.load(require("@/assets/map-red.jpg"))
-            // });
-            // const materialGreen = new Three.MeshBasicMaterial({
-            //     map: loader.load(require("@/assets/map-green.jpg"))
-            // });
-            // const materialBlue = new Three.MeshBasicMaterial({
-            //     map: loader.load(require("@/assets/map-blue.jpg"))
-            // });
 
             if (this.$store.state.fishes.length) {
                 this.$store.state.fishes.slice().reverse().forEach((fish, i) => {
+
                     var copyMaterial = this.mommyFish.getObjectByName('fish').material.clone()
                     copyMaterial.color.setHex(parseInt(fish.color.substr(1), 16))
 
                     var fishObject = this.mommyFish.clone()
 
-                    console.log('color:' + fish.color) 
+                    // if (i == 0) {
+                    //     var bendyBody = this.mommyFish.getObjectByName('fish').clone()
+
+                    //     bendyBody.name = 'fish-bendy'
+
+                     
+                    //     console.log(bendyBody)
+                    // }
+
+                    console.log('color:' + fish.color)
                     fishObject.getObjectByName('fish').material = copyMaterial
-                    // if (fish.color == 'green') {
-                    //     fishObject.getObjectByName('fish').material = materialGreen
-                    // }
-                    // if (fish.color == 'red') {
-                    //     fishObject.getObjectByName('fish').material = materialRed
-                    // }
-                    // if (fish.color == 'blue') {
-                    //     fishObject.getObjectByName('fish').material = materialBlue
-                    // }
-                    // if (fish.color != 'default') {
-                    //     fishObject.getObjectByName('fish').material.map.encoding = 3001
-                    //     fishObject.getObjectByName('fish').material.map.flipY = false
-                    // }
 
                     Object.assign(fishObject.userData, { movement: fish.movement });
                     Object.assign(fishObject.userData, { updown: fish.updown });
                     Object.assign(fishObject.userData, { score: fish.score });
-                    Object.assign(fishObject.userData, { color: fish.color });
-
-                    //fishObject.getObjectByName('fish').position.z 
+                    Object.assign(fishObject.userData, { color: fish.color })
 
                     if (i != 0) {
                         fishObject.scale.set(0.020, 0.020, 0.020)
@@ -231,6 +216,7 @@ export default {
                         fishObject.position.z = 150
                         fishObject.position.x = 400
                     }
+
                     this.allFish.push(fishObject);
                     this.scene.add(fishObject)
                     this.hideShowAllFins(i, fish)

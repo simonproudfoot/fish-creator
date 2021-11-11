@@ -1,7 +1,6 @@
 <template>
 <div class="" style="position: relative">
     <div id="container" style="">
-
         <img v-show="!fishObject || !ready" class="loading" :src="require('@/assets/loader.svg')" />
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
@@ -50,7 +49,6 @@ export default {
     props: ['resetCreator'],
     data() {
         return {
-
             colorSected: '',
             fishTexture: {
                 image: new Image(),
@@ -289,13 +287,13 @@ export default {
             }, 1500);
 
         },
-        flipit() {
-            var newFin = this.fishObject
-                .getObjectByName("pos-pectoral_fin-tail")
-                .clone();
-            newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
-            this.fishObject.add(newFin);
-        },
+        // flipit() {
+        //     var newFin = this.fishObject
+        //         .getObjectByName("pos-pectoral_fin-tail")
+        //         .clone();
+        //     newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
+        //     this.fishObject.add(newFin);
+        // },
         notReady() {
             alert("not ready");
         },
@@ -393,10 +391,7 @@ export default {
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
                         this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
-                        // if (this.fishTexture.finColor !== 'default') {
-                        //     this.fishObject.getObjectByName(name).material.color.set(this.fishTexture.finColor)
-                        //     this.fishObject.getObjectByName(name).material.needsUpdate = true;
-                        // }
+                    
 
                     } else {
                         console.log('missing: ' + name)
@@ -405,10 +400,7 @@ export default {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
                             this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
-                            // if (this.fishTexture.finColor !== 'default') {
-                            //     this.fishObject.getObjectByName(right).material.color.set(this.fishTexture.finColor)
-                            //     this.fishObject.getObjectByName(right).material.needsUpdate = true;
-                            // }
+                           
                         } else {
                             console.log('missing: ' + right)
                         }
@@ -510,6 +502,7 @@ export default {
 
             gltf.scene.getObjectByName('fish').material.color.setHex(parseInt(color.substr(1), 16));
             this.colorSected = color
+
             // if (this.fishTexture.image !== 'default') {
             //     gltf.scene.getObjectByName('fish').material.map.image = this.fishTexture.image
             //     gltf.scene.getObjectByName('fish').material.map.needsUpdate = true;
@@ -539,32 +532,11 @@ export default {
         },
     },
     beforeDestroy() {
-        //   this.scene.remove.apply(this.scene, this.scene.children);
+         this.scene.remove.apply(this.scene, this.scene.children);
     },
 
     async mounted() {
         Three.Cache.enabled = true
-        // var imgnew = new Image()
-        // var arr = ['default', 'red', 'green', 'blue']
-        // var color = arr[Math.floor(Math.random() * arr.length)];
-        // var finColor = ''
-        // this.colorSected = color
-
-        // finColor = this.$store.state.colors[color].finColor
-        // imgnew.src = this.$store.state.colors[color].file
-
-        // imgnew.onload = async () => {
-        //     //Update Texture
-        //     this.fishTexture.image = imgnew
-        //     this.fishTexture.finColor = finColor
-        //     await this.init();
-        //     this.ready = true
-        //     this.animate()
-        // }
-
-        // imgnew.onerror = function () {
-        //     alert("Error occurred while loading image");
-        // };
         await this.init();
         this.ready = true
         this.animate()
