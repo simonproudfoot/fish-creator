@@ -5,14 +5,15 @@
         <img v-if="saving" :src="require('@/assets/bubbles.png')" class="bubbles">
         <img v-if="fail" :src="require('@/assets/fail.svg')" class="fail">
         <img v-if="!playing" class="close" :src="require('@/assets/home.svg')" @click="$store.commit('SET_VIEW', 'attractor')" />
-        <div v-if="!playing" class="howto button small aqua" @click="$store.commit('SET_HOWTO', true)">Help</div>
+        <div v-if="!playing" class="howto button small aqua" @click="$store.commit('SET_HOWTO', true)">Help {{draggingFin}}</div>
         <template v-if="!playing && draggingFin">
-            <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" @dragenter.prevent @dragover.prevent></span>
+            <span v-for="(fin, i) in Object.keys(fins)" :key="i" class="finDrop" :class="fin" :data-fintarget="fin"></span>
+            <!-- @dragenter="dEnter($event)" @dragleave="dLeave($event)" @drop="dropFin('pos-' + fin, $event)" -->
         </template>
         <transition name="fade">
             <footer v-if="!playing && ready" class="footer">
-                <div v-for="(fin, name, i) in fins" class="fin" :key="i" :class="'fin-'+name">
-                    <div draggable="true" class="fin__select" @drag="inMotion(name)" :class="backFin === name ? 'active' : null">
+                <div v-for="(fin, name, i) in fins" class="fin box" :key="i" :class="'fin-'+name" :data-fin="name">
+                    <div class="fin__select" :class="backFin === name ? 'active' : null" :id="name">
                         <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
                     </div>
                     <h3 @click="$store.commit('SET_FININFO', name)">
@@ -43,12 +44,15 @@ import {
 import fininfo from './fininfo.vue'
 import howto from './howto.vue'
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import * as Hammer from 'hammerjs';
+window.Hammer = Hammer.default;
 export default {
     name: "ThreeTest",
     components: { fininfo, howto },
     props: ['resetCreator'],
     data() {
         return {
+            draggingElement: null,
             colorSected: '',
             fishTexture: {
                 image: new Image(),
@@ -259,6 +263,11 @@ export default {
 
     },
     methods: {
+
+        dropFin(val, element) {
+            this.showFin(val);
+            this.draggingFin = ''
+        },
         closePop() {
             this.finInfo = ''
         },
@@ -267,6 +276,7 @@ export default {
             setTimeout(async () => {
                 let final = {}
                 let i = 0
+
                 Object.entries(this.fins).forEach(x => {
                     let key = x[0]
                     let val = x[1].selected
@@ -274,6 +284,7 @@ export default {
                         [key]: val
                     });
                 })
+
                 Object.assign(final, { color: this.colorSected })
                 Object.assign(final, { finColor: this.fishTexture.finColor })
                 Object.assign(final, { movement: this.movement })
@@ -287,35 +298,7 @@ export default {
             }, 1500);
 
         },
-        // flipit() {
-        //     var newFin = this.fishObject
-        //         .getObjectByName("pos-pectoral_fin-tail")
-        //         .clone();
-        //     newFin.applyMatrix4(new Three.Matrix4().makeScale(-1, 1, 1));
-        //     this.fishObject.add(newFin);
-        // },
-        notReady() {
-            alert("not ready");
-        },
-        dEnter(val) {
-            val.target.style.backgroundColor = '#fff';
-            val.target.style.transform = "scale(1.4)";
-        },
-        dLeave(val) {
-            val.target.style.backgroundColor = 'transparent';
-            val.target.style.transform = "initial";
-        },
-        dropFin(val, element) {
-            this.showFin(val);
-            element.target.style.background = "transparent";
 
-            element.target.style.backgroundColor = 'transparent';
-            element.target.style.transform = "initial";
-
-        },
-        inMotion(fin) {
-            this.draggingFin = fin;
-        },
         // Swim animations
         // axis, angle, speed, loop
         sink() {
@@ -354,18 +337,17 @@ export default {
             this.fins[position.split('-').pop()].selected = this.draggingFin
             Object.keys(this.fins).forEach((x) => {
                 let name = position + "_fin-" + x;
+                console.log(name)
                 let active = position + "_fin-" + this.draggingFin;
                 var right = position + "_fin-" + this.draggingFin + '_right';
                 if (this.fishObject.getObjectByName(name) != undefined && name !== active) {
                     this.fishObject.getObjectByName(name).visible = false;
                     if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
-
                         this.fishObject.getObjectByName(name + '_right').visible = false;
                     }
                 } else {
                     this.fishObject.getObjectByName(active).visible = true;
                     this.sideFin = active
-
                     // show other side
                     if (position.split('-').pop() == 'pectoral' || position.split('-').pop() == 'pelvic') {
                         if (right != undefined) {
@@ -391,7 +373,6 @@ export default {
                     if (this.fishObject.getObjectByName(name)) {
                         this.fishObject.getObjectByName(name).visible = false;
                         this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
-                    
 
                     } else {
                         console.log('missing: ' + name)
@@ -400,7 +381,7 @@ export default {
                         if (this.fishObject.getObjectByName(right)) {
                             this.fishObject.getObjectByName(right).visible = false;
                             this.fishObject.getObjectByName(name).material.side = Three.DoubleSide
-                           
+
                         } else {
                             console.log('missing: ' + right)
                         }
@@ -530,9 +511,17 @@ export default {
             return true
 
         },
+
+        preventDefault(e) {
+            e.preventDefault();
+        },
+        disableScroll() {
+            document.body.addEventListener('touchmove', this.preventDefault, { passive: false });
+        },
+
     },
     beforeDestroy() {
-         this.scene.remove.apply(this.scene, this.scene.children);
+        this.scene.remove.apply(this.scene, this.scene.children);
     },
 
     async mounted() {
@@ -540,6 +529,45 @@ export default {
         await this.init();
         this.ready = true
         this.animate()
+        this.disableScroll()
+        this.$nextTick(() => {
+
+            var fin = document.getElementsByClassName("fin")
+
+            Array.from(fin).forEach((el, i) => {
+                Hammer(fin[i]).on('pan', (event) => {
+
+                    var tStyle = document.getElementById(event.target.id).children[0].style
+
+                    if (tStyle) {
+                        tStyle.position = 'fixed'
+                        tStyle.width = '172px'
+                        tStyle.height = '172px'
+                        tStyle.left = event.center.x - 100 + 'px'
+                        tStyle.top = event.center.y - 100 + 'px'
+                    }
+                    this.draggingFin = event.target.id
+
+                });
+                Hammer(el).on('panend', (event) => {
+
+                    var targetPosition = document.elementsFromPoint(event.center.x, event.center.y)[0].classList[1]
+
+                    var elemStyle = document.getElementById(this.draggingFin).children[0].style
+
+                    elemStyle.position = 'absolute'
+                    elemStyle.left = '-5%'
+                    elemStyle.top = '-4%'
+                    elemStyle.width = '110%'
+                    elemStyle.height = ''
+
+                    if (targetPosition != undefined) {
+                        this.dropFin('pos-' + targetPosition)
+                    }
+
+                });
+            })
+        })
     },
 };
 </script>
@@ -561,6 +589,7 @@ export default {
     color: #06909c;
     overflow: hidden;
     background-color: #ddf3f5;
+
 }
 
 .controls {
@@ -675,6 +704,9 @@ export default {
     width: 110%;
     top: -4%;
     height: 116%;
+
+    /* max-width: 100px;
+        max-height: 100px; */
     margin: auto;
 }
 
