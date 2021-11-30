@@ -14,7 +14,7 @@
             <footer v-if="!playing && ready" class="footer">
                 <div v-for="(fin, name, i) in fins" class="fin box" :key="i" :class="'fin-'+name" :data-fin="name">
                     <div class="fin__select" :class="backFin === name ? 'active' : null" :id="name">
-                        <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" />
+                        <img :src="require('@/assets/fins/' + fin.thumbnail)" style="pointer-events: none" :ref="name"/>
                     </div>
                     <h3 @click="$store.commit('SET_FININFO', name)">
                         <img :src="require('@/assets/info.svg')" />{{name}}
@@ -535,9 +535,19 @@ export default {
             var fin = document.getElementsByClassName("fin")
 
             Array.from(fin).forEach((el, i) => {
+
+                Hammer(fin[i]).on('panstart', (event) => {
+                    console.log(event.target.id)
+                    if (event.target.id != undefined) {
+                     //   this.draggingElement = this.$refs[this.draggingFin][0]
+                        this.draggingFin = event.target.id
+                    }
+
+                });
+
                 Hammer(fin[i]).on('pan', (event) => {
 
-                    var tStyle = document.getElementById(event.target.id).children[0].style
+                    var tStyle = document.getElementById(this.draggingFin).children[0].style
 
                     if (tStyle) {
                         tStyle.position = 'fixed'
@@ -546,7 +556,7 @@ export default {
                         tStyle.left = event.center.x - 100 + 'px'
                         tStyle.top = event.center.y - 100 + 'px'
                     }
-                    this.draggingFin = event.target.id
+                 
 
                 });
                 Hammer(el).on('panend', (event) => {
